@@ -1,0 +1,12 @@
+---
+nfs_server_export:
+  - {path: '/mnt/nfs-share' , allowed_servers: '*.home.lcl' , allowed_parametrs: 'rw,sync,no_subtree_check,no_root_squash' }
+#  - {path: '/home' , allowed_servers: '*.home.lcl' , allowed_parametrs: 'rw,sync,no_subtree_check,no_root_squash' }
+  
+# - {path: '{{ path_nfs }}' , allowed_servers: "{{ allowed_servers_nfs_share }}" , allowed_parametrs: "{{ allowed_parametrs_nfs_share }}" }
+#
+#path_nfs: 
+#  - '/mnt'
+#  - '/home'
+#allowed_servers_nfs_share:  "*.home.lcl"
+#allowed_parametrs_nfs_share: rw,sync,no_subtree_check,no_root_squash

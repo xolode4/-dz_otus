@@ -1,0 +1,6 @@
+- name: Установка пакетов на Ubuntu
+
+  apt:
+    name: "{{ standart_package_list }}"
+    state: present
+  

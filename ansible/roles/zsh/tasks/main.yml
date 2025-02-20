@@ -1,0 +1,13 @@
+---
+# tasks file for ansible/roles/zsh
+
+  - sudo chsh -s /bin/zsh ci-user            # Установка zsh для пользователя ci-user
+  - sudo chsh -s /bin/zsh vladimir           # Установка zsh для пользователя vladimir
+  - sudo chsh -s /bin/zsh root
+  - sudo curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sudo bash
+  - git clone https://github.com/ohmyzsh/ohmyzsh.git /etc/skel/.oh-my-zsh 
+  - git clone https://github.com/ohmyzsh/ohmyzsh.git /home/vladimir/.oh-my-zsh 
+  - git clone https://github.com/zsh-users/zsh-autosuggestions //etc/skel/.oh-my-zsh/plugins/zsh-autosuggestions
+  - git clone https://github.com/zsh-users/zsh-autosuggestions /home/vladimir/.oh-my-zsh/plugins/zsh-autosuggestions
+  - chown vladimir:vladimir -R /home/vladimir/.oh-my-zsh
+  - reboot

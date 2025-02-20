@@ -1,0 +1,20 @@
+---
+- name: Run the equivalent of "apt-get update" as a separate step
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install a list of nginx
+  ansible.builtin.apt:
+    pkg:
+    - nginx
+  notify:
+    - Enable nginx
+
+- name: Template configuration file
+  ansible.builtin.template:
+    src: default.j2
+    dest: /etc/nginx/sites-available/default
+  notify:
+    - Reload nginx
+

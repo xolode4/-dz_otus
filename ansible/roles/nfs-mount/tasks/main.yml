@@ -1,0 +1,17 @@
+---
+# tasks file for nfs-mount
+# Include variables and define needed variables.
+- name: Include OS-specific variables.
+  include_vars: "{{ ansible_os_family }}.yml"
+
+- include_tasks: setup-Debian.yml
+  when: ansible_os_family == 'Debian'
+
+- name: Mount NFS '{{ item.nfs_server }}'
+  ansible.posix.mount:
+    src: '{{ item.nfs_server }}:{{item.nfs_share}}'
+    path: '/mnt/nfs/{{ item.nfs_server }}{{ item.nfs_mount_point }}'
+    fstype: nfs4
+    state: absent
+  with_items:
+    - "{{ mount_nfs }}"

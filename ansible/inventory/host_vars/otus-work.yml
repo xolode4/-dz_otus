@@ -1,0 +1,9 @@
+standart_package_list:
+ - vim
+ - traceroute
+ - net-tools
+ - tcpdump
+ - curl
+ - wget
+ - git
+ - ansible

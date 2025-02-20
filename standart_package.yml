@@ -1,0 +1,10 @@
+- hosts: all
+  gather_facts: yes
+  become: yes
+  roles:
+    - role: ansible/roles/standart_package
+      #vars:
+      #  standart_package_list:
+      #    - curl
+      #    - vim
+      #    - htop

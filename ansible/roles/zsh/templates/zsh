@@ -1,0 +1,43 @@
+
+write_files:
+  - path: /home/vladimir/.zshrc
+    permissions: '0644'
+    defer: true
+    owner: vladimir:vladimir
+    content: |
+      export ZSH="$HOME/.oh-my-zsh"
+      ZSH_THEME="jonathan"
+      plugins=(git zsh-autosuggestions kubectl helm)
+      source $ZSH/oh-my-zsh.sh
+  
+  - path: /home/vladimir/.zshrc.pre-oh-my-zsh
+    permissions: '0644'
+    defer: true
+    owner: vladimir:vladimir
+    content: |
+      # Lines configured by zsh-newuser-install
+      HISTFILE=~/.histfile
+      HISTSIZE=1000
+      SAVEHIST=1000
+      bindkey -e
+
+  - path: /etc/skel/.zshrc
+    permissions: '0644'
+    defer: true
+    owner: root:root
+    content: |
+      export ZSH="$HOME/.oh-my-zsh"
+      ZSH_THEME="jonathan"
+      plugins=(git zsh-autosuggestions  kubectl helm)
+      source $ZSH/oh-my-zsh.sh
+  
+  - path: /etc/skel/.zshrc.pre-oh-my-zsh
+    permissions: '0644'
+    defer: true
+    owner: root:root
+    content: |
+      # Lines configured by zsh-newuser-install
+      HISTFILE=~/.histfile
+      HISTSIZE=1000
+      SAVEHIST=1000
+      bindkey -e

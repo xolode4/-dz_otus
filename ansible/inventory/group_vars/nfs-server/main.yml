@@ -1,0 +1,2 @@
+nfs_server_export:
+  - {path: '/mnt/nfs-share' , allowed_servers: '*.home.lcl' , allowed_parametrs: 'rw,sync,no_subtree_check,no_root_squash' }

@@ -1,0 +1,29 @@
+all:
+  children:
+    web:
+      hosts:
+        dev-web-1:
+        dev-web-2:
+    app:
+      hosts:
+        dev-app-1:
+        dev-app-2:
+    db:
+      hosts:
+        dev-db-1:
+        dev-db-2:
+  hosts:
+    otus-work:
+      ansible_host:
+    dev-web-1:
+      ansible_host: 192.168.1.11
+    dev-web-2:
+      ansible_host: 192.168.1.12
+    dev-app-1:
+      ansible_host: 192.168.1.12
+    dev-app-2:
+      ansible_host: 192.168.1.13
+    dev-db-1:
+      ansible_host: 192.168.1.14
+    dev-db-2:
+      ansible_host: 192.168.1.15

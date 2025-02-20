@@ -1,0 +1,28 @@
+---
+#https://www.golinuxcloud.com/nfs-exports-options-examples/
+
+# Include variables and define needed variables.
+#- name: Include OS-specific variables.
+  #include_vars: "{{ ansible_os_family }}.yml"
+
+- include_tasks: setup-Debian.yml
+  when: ansible_os_family == 'Debian'
+
+- name: Copy exports file.
+  template:
+    src: exports.j2
+    dest: /etc/exports
+    owner: root
+    group: root
+    mode: 0644
+
+- name: add export parametr
+  lineinfile:
+    dest: /etc/exports
+    state: present
+    line: '{{ item.path }} {{ item.allowed_servers }} ({{ item.allowed_parametrs }})'
+  with_items:
+  - "{{ nfs_server_export }}"
+  when: nfs_server_export is defined
+  notify: reload nfs
+

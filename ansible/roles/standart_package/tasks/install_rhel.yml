@@ -1,0 +1,4 @@
+- name: Установка пакетов на RHEL
+  yum:
+    name: "{{ standart_package_list }}"
+    state: present
