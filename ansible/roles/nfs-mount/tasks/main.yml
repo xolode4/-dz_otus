@@ -10,8 +10,19 @@
 - name: Mount NFS '{{ item.nfs_server }}'
   ansible.posix.mount:
     src: '{{ item.nfs_server }}:{{item.nfs_share}}'
-    path: '/mnt/nfs/{{ item.nfs_server }}{{ item.nfs_mount_point }}'
+    path: '/mnt/nfs/{{ item.nfs_server }}/{{ item.nfs_mount_point }}'
     fstype: nfs4
-    state: absent
+    state: '{{ item.state }}'
+  with_items:
+    - "{{ mount_nfs }}"
+
+- name: Установить владельца и права для /mnt/nfs-share
+  file:
+    path: '/mnt/nfs/{{ item.nfs_server }}/{{ item.nfs_mount_point }}'
+    owner: root  # Укажи нужного владельца
+    group: root  # Укажи нужную группу
+    mode: '0775'      # Укажи нужные права
+    state: directory
+    recurse: yes 
   with_items:
     - "{{ mount_nfs }}"

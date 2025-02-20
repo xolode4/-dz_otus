@@ -1,4 +1,4 @@
 ---
 # vars file for nfs-mount
 mount_nfs:
-  - {nfs_server: 'nfs-server.home.lcl' , nfs_share: '/mnt/nfs-share' , nfs_mount_point: /mnt/nfs-share }
+  - {nfs_server: 'nfs-server.home.lcl' , nfs_share: '/mnt/nfs-share' , nfs_mount_point: nfs-share , state: mounted  }
