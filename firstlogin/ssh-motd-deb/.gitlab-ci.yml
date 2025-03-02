@@ -1,0 +1,60 @@
+stages:
+  - build
+  - deploy
+
+build-deb:
+  stage: build
+  image: debian:latest
+  script:
+    - apt update && apt install -y dpkg-dev
+    - mkdir -p build/DEBIAN
+    - cp -r debian/* build/DEBIAN/
+    - mkdir -p build/etc/update-motd.d/
+    - cp etc/update-motd.d/99-custom-motd build/etc/update-motd.d/
+    - dpkg-deb --build build ssh-motd.deb
+  artifacts:
+    paths:
+      - ssh-motd.deb
+    expire_in: 1h  # Артефакт будет доступен 1 час
+
+deploy-repo:
+  stage: deploy
+  image: debian:latest
+  dependencies:
+    - build-deb  # Говорим GitLab CI, что этот job зависит от артефактов build-deb
+  script:
+    - |
+       mkdir -p repo/pool repo/conf repo/dists/stable/main/binary-all
+       cp ssh-motd.deb repo/pool/
+       echo "Origin: goreadmin" > repo/conf/distributions
+       echo "Label: Custom SSH MOTD Repo" >> repo/conf/distributions
+       echo "Suite: stable" >> repo/conf/distributions
+       echo "Codename: stable" >> repo/conf/distributions
+       echo "Architectures: all" >> repo/conf/distributions
+       echo "Components: main" >> repo/conf/distributions
+       echo "Description: Репозиторий с SSH MOTD" >> repo/conf/distributions
+       apt update && apt install -y dpkg-dev
+       mkdir -p repo/dists/stable/main/binary-amd64
+       dpkg-scanpackages repo/pool /dev/null | gzip -9 > repo/dists/stable/main/binary-amd64/Packages.gz
+       git config --global user.email "gitlab-ci@example.com"
+       git config --global user.name "GitLab CI"
+       git add repo/
+       git commit -m "Обновление APT-репозитория"
+       git push origin main
+
+
+  artifacts:
+    paths:
+      - ssh-motd.deb
+
+deploy-package-registry:
+  stage: deploy
+  image: debian:latest
+  script:
+    - |
+       apt update && apt install -y curl
+       curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --data-binary @ssh-motd.deb "https://gitlab.home.lc/api/v4/projects/app/packages/debian/pool/main/"
+  dependencies:
+    - build-deb
+  only:
+    - main

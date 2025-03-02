@@ -1,0 +1,15 @@
+#!/bin/bash
+rm -f /etc/update-motd.d/99-custom-motd
+FILES=$(ls /etc/update-motd.d | tr '\n' ',')
+
+IFS=',' read -r -a FILE_ARRAY <<< "$FILES"
+
+
+for FILE in "${FILE_ARRAY[@]}"; do
+    if [ -f "$FILE" ]; then
+        sed -i 's/^#//' "$FILE"
+        echo "Удалены решетки в файле $FILE."
+    else
+        echo "Файл $FILE не найден."
+    fi
+done

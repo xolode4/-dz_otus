@@ -1,0 +1,59 @@
+#!/bin/bash
+FILES=$(ls /etc/update-motd.d | tr '\n' ',')
+IFS=',' read -r -a FILE_ARRAY <<< "$FILES"
+
+
+for FILE in "${FILE_ARRAY[@]}"; do
+    if [ -f "$FILE" ]; then
+        # Если файл существует, добавляем решетку в начало каждой строки
+        echo "Обрабатываем файл: $FILE"
+        sed -i 's/^/#/' "$FILE"
+        echo "В файле $FILE добавлены решетки в начало строк."
+    else
+         echo "В файле $FILE изменений нет."
+    fi
+done
+
+cat << EOF > /etc/update-motd.d/99-custom-motd
+#!/bin/bash
+# Цвета
+GREEN="\e[1;32m"
+BLUE="\e[1;34m"
+CYAN="\e[1;36m"
+MAGENTA="\e[1;35m"
+YELLOW="\e[1;33m"
+RED="\e[1;31m"
+RESET="\e[0m"
+
+# Дата и система
+DATE=\$(date "+%d-%m-%Y %H:%M")
+HOSTNAME=\$(uname -n)
+
+# IP-адрес подключения
+CLIENT_IP=\$(echo \$SSH_CLIENT | awk '{print \$1}')
+
+# Нагрузка на систему
+CPU_LOAD=\$(top -bn1 | grep "load average:" | awk '{print \$10,\$11,\$12}')
+MEMORY_USAGE=\$(free -h | awk '/^Mem:/ {print \$3 "/" \$2}')
+DISK_USAGE=\$(df -h / | awk 'NR==2 {print \$3 "/" \$2}')
+
+# Сетевая активность (замени ens18 на свой интерфейс)
+NET_USAGE=\$(ip -s link show ens18 | awk 'NR==5 {print \$1 " received, " \$2 " transmitted"}')
+
+# Вывод сообщения
+echo -e "\$GREEN******************************************\$RESET"
+echo -e "\$BLUE*    Добро пожаловать в систему!        *\$RESET"
+echo -e "\$CYAN*    Сегодня: \$DATE               *\$RESET"
+echo -e "\$MAGENTA*    Система: \$HOSTNAME              *\$RESET"
+echo -e "\$YELLOW******************************************\$RESET"
+echo -e "\$BLUE* IP подключения: \$CLIENT_IP           *\$RESET"
+echo -e "\$CYAN* CPU: \$CPU_LOAD                        *\$RESET"
+echo -e "\$MAGENTA* Память: \$MEMORY_USAGE                 *\$RESET"
+echo -e "\$YELLOW* Диск: \$DISK_USAGE                     *\$RESET"
+echo -e "\$BLUE* Сеть: \$NET_USAGE                      *\$RESET"
+echo -e "\$GREEN******************************************\$RESET"
+echo -e "\$RED           by goreadmin                  \$RESET"
+EOF
+
+# Даем права на выполнение
+chmod +x /etc/update-motd.d/99-custom-motd

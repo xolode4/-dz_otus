@@ -1,0 +1,9 @@
+Package: ssh-motd
+Version: 1.1-3
+Section: misc
+Priority: optional
+Architecture: all
+Maintainer: goreadmin <goreadmin@example.com>
+Description: Custom SSH MOTD banner
+ This package provides a customized SSH Message of the Day (MOTD)
+ with system information and connection details.
