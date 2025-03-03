@@ -30,3 +30,8 @@ ansible-playbook -i "10.10.10.56," nginx.yaml -e "nginx_server_port=9090"
 NFS-MOUNT
 
 ansible-playbook -i "10.10.10.56," nfs-mount.yaml  
+
+
+mdadm
+
+ansible-playbook -i "10.10.10.56," mdadm.yaml  

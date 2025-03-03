@@ -1,0 +1,29 @@
+---
+# vars file for ansible/roles/mdadm
+mdamd_raid:
+  - raid_device_name: '/dev/md0'
+    raid_level: '0'
+    raid_devices:
+      - '/dev/sdb'
+      - '/dev/sdc'
+mdamd_raid_partition:
+      - disk: '/dev/md0'
+        num: 1
+        start: "0%"
+        end: "20%"
+      - disk: '/dev/md0'
+        num: 2
+        start: "20%"
+        end: "40%"
+#      - disk: '/dev/md0'
+#        num: 3
+#        start: "40%
+#        end: "60%"
+#      - disk: '/dev/md0'
+#        num: 4
+#        start: "60%"
+#        end: "80%"
+#      - disk: '/dev/md0'
+#        num: 5
+#        start: "80%"
+#        end: "100%"

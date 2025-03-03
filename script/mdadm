@@ -1,0 +1,23 @@
+mdadm --create --verbose /dev/md0 --level=0 --raid-devices=2 /dev/sd[b-c]
+cat /proc/mdstat
+mdadm --detail --scan >> /etc/mdadm/mdadm.conf
+update-initramfs -u
+
+
+
+parted /dev/md0 --script mklabel gpt
+parted /dev/md0 --script mkpart primary ext4 0% 20%
+parted /dev/md0 --script mkpart primary ext4 20% 40%
+parted /dev/md0 --script mkpart primary ext4 40% 60%
+parted /dev/md0 --script mkpart primary ext4 60% 80%
+parted /dev/md0 --script mkpart primary ext4 80% 100%
+
+nano /etc/mdadm/mdadm.conf 
+
+mdadm --stop /dev/md0
+mdadm --remove /dev/md0
+mdadm --zero-superblock --force /dev/sdc
+mdadm --zero-superblock --force /dev/sdb
+wipefs --all /dev/sdc
+wipefs --all /dev/sdb
+update-initramfs -u

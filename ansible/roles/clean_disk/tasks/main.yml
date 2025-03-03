@@ -1,0 +1,35 @@
+---
+# tasks file for ansible/roles/clean_disk
+- name: Умонтировать диски
+  ansible.builtin.shell: |
+    umount {{ item }}
+  with_items: "{{ clean_disk_umount }}"
+  ignore_errors: yes
+
+- name: Остановить RAID массив
+  ansible.builtin.shell:
+    cmd: mdadm --stop {{ item }}
+  with_items: "{{ clean_disk_mdadm }}"
+  ignore_errors: yes
+
+- name: Удалить RAID массив
+  ansible.builtin.shell:
+    cmd: mdadm --remove {{ item }}
+  with_items: "{{ clean_disk_mdadm }}"
+  ignore_errors: yes
+
+- name: Очистить суперблок RAID
+  ansible.builtin.shell:
+    cmd: mdadm --zero-superblock --force {{ item }}
+  with_items: "{{ clean_disk_blk }}"
+  ignore_errors: yes
+
+- name: Очистить метки на устройстве
+  ansible.builtin.shell:
+    cmd: wipefs --all {{ item }}
+  with_items: "{{ clean_disk_blk }}"
+  ignore_errors: yes
+
+- name: Перезагрузить initramfs
+  command: update-initramfs -u
+  ignore_errors: yes

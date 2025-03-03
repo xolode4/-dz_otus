@@ -1,0 +1,95 @@
+---
+# tasks file for ansible/roles/mdadm
+- name: Install mdadm
+  apt:
+    name:
+      - mdadm 
+    state: present
+
+- name: Проверяем статус RAID
+  command: mdadm --detail {{ item.raid_device_name }}
+  register: raid_status
+  failed_when: false
+  changed_when: false
+  loop: "{{ mdamd_raid }}"
+
+#- name: Выводим результат проверки RAID
+#  debug:
+#    var: item.stderr
+#  loop: "{{ raid_status.results }}"
+
+#- name: Проверяем структуру mdamd_raid
+#  debug:
+#    var: mdamd_raid
+
+- name: Создаём RAID-массив (если он не существует)
+  command: >
+    mdadm --create --verbose {{ item.raid_device_name }}
+    --level={{ item.raid_level }} --raid-devices={{ item.raid_devices | length }} {{ item.raid_devices | join(' ') }}
+
+  loop: "{{ mdamd_raid }}"
+
+
+- name: Проверяем, есть ли конфигурация RAID в mdadm.conf
+  command: mdadm --detail --scan
+  register: mdadm_scan
+  changed_when: false
+
+- name: Обновляем конфигурацию mdadm.conf (если отсутствует)
+  ansible.builtin.lineinfile:
+    path: /etc/mdadm/mdadm.conf
+    line: "{{ mdadm_scan.stdout }}"
+    insertafter: EOF
+    state: present
+  notify: reload initramfs
+
+#- name: Выводим результат проверки 
+#  debug:
+#    var: item.raid_device_name
+#  loop: "{{ mdamd_raid }}"
+
+#- name: Размечаем RAID в GPT (если еще не размечен)
+#  community.general.parted:
+#    device: "{{ item.raid_device_name }}"
+#    label: gpt
+#    state: present
+#  loop: "{{ mdamd_raid }}"
+#- name: Проверяем структуру mdamd_raid
+#  debug:
+#    var: mdamd_raid_partition
+
+- name: Создаём 5 разделов на RAID-диске
+  community.general.parted:
+    label: gpt
+    device: "{{ item.disk }}"
+    number: "{{ item.num }}"
+    part_start: "{{ item.start }}"
+    part_end: "{{ item.end }}"
+    fs_type: ext4
+    state: present
+  loop: "{{ mdamd_raid_partition }}"
+
+- name: Форматируем раздел в ext4
+  filesystem:
+    fstype: ext4
+    dev: "{{ item.disk }}p{{ item.num }}"
+  loop: "{{ mdamd_raid_partition }}"
+
+- name: Добавляем разделы в fstab
+  ansible.builtin.lineinfile:
+    path: /etc/fstab
+    line: "{{ item.disk }}p{{ item.num }}  /mnt/data{{ item.num }} ext4 defaults 0 2"
+    insertafter: EOF
+    state: present
+  loop: "{{ mdamd_raid_partition }}"
+
+- name: Создаём точки монтирования и монтируем разделы
+  ansible.builtin.mount:
+    path: "/mnt/data{{ item.num }}"
+    src: "{{ item.disk }}p{{ item.num }}"
+    fstype: ext4
+    opts: defaults
+    state: mounted
+  loop: "{{ mdamd_raid_partition }}"
+
+  
