@@ -1,0 +1,30 @@
+
+   19  zfs get compression
+   20  zfs create zpool_opt/test_gzip
+   21  zfs create zpool_opt/test_zle
+   22  zfs create zpool_opt/test_lzjb
+   23  zfs create zpool_opt/test_lz4
+   24  zfs set compression=gzip zpool_opt/test_gzip
+   25  zfs set compression=zle zpool_opt/test_zle
+   26  zfs set compression=lzjb zpool_opt/test_lzjb
+   27  zfs set compression=lz4 zpool_opt/test_lz4
+   28  zfs get compression
+   29  df -h
+   30  zpool delete
+   31  zpool status
+   40  cp /var/log/syslog /opt/test_gzip/
+   41  cp /var/log/syslog /opt/test_zle/
+   42  cp /var/log/syslog /opt/test_lzjb/
+   43  cp /var/log/syslog /opt/test_lz4/
+   44  zfs list -o name,used,compression,compressratio
+   45  zpool list
+   46  zpool status
+   47  zfs get recordsize zpool_opt
+   48  zpool get all zpool_opt
+   55  ls -la
+   57  zfs receive zpool_opt/test@today < otus_task2.file
+   58  find /otp/ -name "secret_message"
+   59  /otus/test/task1/file_mess/secret_message
+   60  find /opt/ -name "secret_message"
+   61  cat /opt/test/task1/file_mess/secret_message
+   62  history 
