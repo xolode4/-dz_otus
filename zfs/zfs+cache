@@ -1,0 +1,43 @@
+ls -lah /opt
+ls -lah /opt/
+lsmod | grep zfs
+lsblk
+zpool create -f   -o ashift=12   -O compression=lz4   -O atime=off   -O xattr=sa   -O acltype=posixacl   -O relatime=on   -O mountpoint=/opt   zpool_opt /dev/sdb   cache /dev/sdc
+zpoolstatus
+zpool status
+df -h | grep /opt
+df -h 
+echo '0 * * * * root zfs snapshot zpool_opt@$(date +\%Y-\%m-\%d_\%H:\%M)' | sudo tee -a /etc/cron.d/zfs-snapshots
+zfs list -t snapshot
+zfs snapshot zpool_opt@backup-$(date +%Y-%m-%d_%H-%M)
+zfs list -t snapshot
+zfs destroy zpool_opt@backup-2025-03-03_22-04
+zfs list -t snapshot
+history 
+
+
+root@ansible-test:/home/vladimir# df -h | grep /opt
+zpool_opt       9.3G  128K  9.3G   1% /opt
+root@ansible-test:/home/vladimir# df -h 
+Filesystem      Size  Used Avail Use% Mounted on
+tmpfs           197M  1.1M  196M   1% /run
+/dev/sda1       9.6G  2.1G  7.4G  23% /
+tmpfs           983M     0  983M   0% /dev/shm
+tmpfs           5.0M     0  5.0M   0% /run/lock
+/dev/sda15      105M  6.1M   99M   6% /boot/efi
+tmpfs           197M  4.0K  197M   1% /run/user/1001
+zpool_opt       9.3G  128K  9.3G   1% /opt
+
+root@ansible-test:/home/vladimir# echo '0 * * * * root zfs snapshot zpool_opt@$(date +\%Y-\%m-\%d_\%H:\%M)' | sudo tee -a /etc/cron.d/zfs-snapshots
+0 * * * * root zfs snapshot zpool_opt@$(date +\%Y-\%m-\%d_\%H:\%M)
+root@ansible-test:/home/vladimir# 
+root@ansible-test:/home/vladimir# zfs list -t snapshot
+no datasets available
+root@ansible-test:/home/vladimir# zfs snapshot zpool_opt@backup-$(date +%Y-%m-%d_%H-%M)
+root@ansible-test:/home/vladimir# zfs list -t snapshot
+NAME                                USED  AVAIL     REFER  MOUNTPOINT
+zpool_opt@backup-2025-03-03_22-04     0B      -       96K  -
+root@ansible-test:/home/vladimir# zfs destroy zpool_opt@backup-2025-03-03_22-04
+root@ansible-test:/home/vladimir# 
+
+root@ansible-test:/home/vladimir# zfs list -t snapshot
