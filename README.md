@@ -35,3 +35,8 @@ ansible-playbook -i "10.10.10.56," nfs-mount.yaml
 mdadm
 
 ansible-playbook -i "10.10.10.56," mdadm.yaml  
+
+
+свой репозиторий :
+пакет находится в firstlogon
+мини инструкция в repository

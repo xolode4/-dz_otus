@@ -15,13 +15,12 @@ build-deb:
   artifacts:
     paths:
       - ssh-motd.deb
-    expire_in: 1h  # Артефакт будет доступен 1 час
-
+    expire_in: 1h  
 deploy-repo:
   stage: deploy
   image: debian:latest
   dependencies:
-    - build-deb  # Говорим GitLab CI, что этот job зависит от артефактов build-deb
+    - build-deb  
   script:
     - |
        mkdir -p repo/pool repo/conf repo/dists/stable/main/binary-all

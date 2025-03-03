@@ -1,0 +1,27 @@
+apt update && sudo apt install -y  apache2 reprepro
+
+cd /mnt/data/
+
+mkdir -p debian/{conf,incoming,pool}
+
+<VirtualHost *:80>
+ServerAdmin webmaster@localhost
+DocumentRoot /mnt/data/debian
+
+<Directory /mnt/data/debian>
+    Options Indexes FollowSymLinks
+    AllowOverride None
+    Require all granted
+</Directory>
+
+ErrorLog /var/lock/apache2/error.log
+CustomLog /var/lock/apache2/access.log combined
+</VirtualHost>
+
+
+собрать пакет dpkg-deb --build ssh-motd
+
+Создать репу
+
+reprepro -b /mnt/data/debian includedeb stable ssh-motd-deb.deb
+
