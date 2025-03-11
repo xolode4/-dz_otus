@@ -1,0 +1,37 @@
+---
+# tasks file for ansible/roles/grub
+- name: Заменить строку в файле GRUB_CMDLINE_LINUX_DEFAULT
+  ansible.builtin.lineinfile:
+    path: /etc/default/grub  # Укажи нужный файл
+    regexp: 'GRUB_CMDLINE_LINUX_DEFAULT='  # Найти строку, начинающуюся с GRUB_CMDLINE_LINUX=
+    line: '{{ GRUB_GRUB_CMDLINE_LINUX_DEFAULT }}'  # Новое значение строки
+    backup: yes  # Создаст резервную копию файла
+  notify: Обновить GRUB
+
+- name: Заменить строку в файле GRUB_TIMEOUT
+  ansible.builtin.lineinfile:
+    path: /etc/default/grub  # Укажи нужный файл
+    regexp: 'GRUB_TIMEOUT='  # Найти строку, начинающуюся с GRUB_TIMEOUT=
+    line: '{{ GRUB_GRUB_TIMEOUT }}'  # Новое значение строки
+    backup: yes 
+  notify: Обновить GRUB
+
+- name: Переименование группы томов LVM
+  ansible.builtin.command: vgrename {{ grub_old_vg }} {{ grub_new_vg }}
+  register: vgrename_result
+  failed_when: vgrename_result.rc != 0 and "not found" not in vgrename_result.stder
+
+- name: Обновление fstab
+  ansible.builtin.replace:
+    path: /etc/fstab
+    regexp: '{{ grub_old_vg }}'
+    replace: '{{ grub_new_vg }}'
+    backup: yes
+
+- name: Обновление grub.cfg и загрузочных параметров
+  ansible.builtin.replace:
+    path: /boot/grub/grub.cfg
+    regexp: '{{ grub_old_vg_grub }}'
+    replace: '{{ grub_new_vg_grub }}'
+    backup: yes
+  notify: Обновить GRUB
