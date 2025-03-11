@@ -1,0 +1,204 @@
+---
+# tasks file for ansible/roles/systemd
+- name: Ensure required packages are installed
+  ansible.builtin.apt:
+    name:
+      - spawn-fcgi
+      - fcgiwrap
+      - php
+      - php-cgi
+      - php-cli
+      - apache2
+      - libapache2-mod-fcgid
+      - nginx
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Ensure required packages are installed
+  ansible.builtin.yum:
+    name: spawn-fcgi
+    state: present
+  when: ansible_os_family == "RedHat"
+
+- name: Create /etc/default/watchlog configuration file
+  ansible.builtin.copy:
+    dest: /etc/default/watchlog
+    content: |
+      # Configuration file for my watchlog service
+          WORD="ALERT"
+          LOG="/var/log/watchlog.log"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Create /var/log/watchlog.log
+  ansible.builtin.file:
+    path: /var/log/watchlog.log
+    state: touch
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Create watchlog script
+  ansible.builtin.copy:
+    dest: /opt/watchlog.sh
+    content: |
+      #!/bin/bash
+      WORD=$1
+      LOG=$2
+      DATE=`date`
+      if grep $WORD $LOG &> /dev/null
+      then
+      logger "$DATE: I found word, Master!"
+      else
+        exit 0
+      fi
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Create systemd service unit file
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/watchlog.service
+    content: |
+      [Unit]
+      Description=My watchlog service
+      [Service]
+      Type=oneshot
+      EnvironmentFile=/etc/default/watchlog
+      ExecStart=/opt/watchlog.sh $WORD $LOG
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Create systemd timer unit file
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/watchlog.timer
+    content: |
+      [Unit]
+      Description=Run watchlog script every 30 seconds
+      [Timer]
+      OnUnitActiveSec=30
+      Unit=watchlog.service
+      [Install]
+      WantedBy=multi-user.target
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: /etc/spawn-fcgi/fcgi.conf
+  ansible.builtin.file:
+    path: /etc/spawn-fcgi
+    state: directory
+    mode: '0644'
+
+
+- name: Create spawn-fcgi configuration file
+  ansible.builtin.copy:
+    dest: /etc/spawn-fcgi/fcgi.conf
+    content: |
+      SOCKET=/var/run/php-fcgi.sock
+      OPTIONS="-u www-data -g www-data -s $SOCKET -S -M 0600 -C 32 -F 1 -- /usr/bin/php-cgi"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Create systemd service unit file for spawn-fcgi
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/spawn-fcgi.service
+    content: |
+      [Unit]
+      Description=Spawn-fcgi startup service by Otus
+      After=network.target
+      [Service]
+      Type=simple
+      PIDFile=/var/run/spawn-fcgi.pid
+      EnvironmentFile=/etc/spawn-fcgi/fcgi.conf
+      ExecStart=/usr/bin/spawn-fcgi -n $OPTIONS
+      KillMode=process
+      [Install]
+      WantedBy=multi-user.target
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Create systemd service unit file for nginx instances
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/nginx@.service
+    content: |
+      [Unit]
+      Description=A high performance web server and a reverse proxy server
+      Documentation=man:nginx(8)
+      After=network.target nss-lookup.target
+      [Service]
+      Type=forking
+      PIDFile=/run/nginx-%I.pid
+      ExecStartPre=/usr/sbin/nginx -t -c /etc/nginx/nginx-%I.conf -q -g 'daemon on; master_process on;'
+      ExecStart=/usr/sbin/nginx -c /etc/nginx/nginx-%I.conf -g 'daemon on; master_process on;'
+      ExecReload=/usr/sbin/nginx -c /etc/nginx/nginx-%I.conf -g 'daemon on; master_process on;' -s reload
+      ExecStop=-/sbin/start-stop-daemon --quiet --stop --retry QUIT/5 --pidfile /run/nginx-%I.pid
+      TimeoutStopSec=5
+      KillMode=mixed
+      [Install]
+      WantedBy=multi-user.target
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Create file nginx-first.conf
+  ansible.builtin.copy:
+    dest: /etc/nginx/nginx-first.conf
+    content: |
+      pid /run/nginx-first.pid;
+
+      http {
+      …
+      	server {
+      		listen 9001;
+      	}
+      #include /etc/nginx/sites-enabled/*;
+      ….
+      }
+
+- name: Create file nginx-second.conf
+  ansible.builtin.copy:
+    dest: /etc/nginx/nginx-second.conf
+    content: |
+      pid /run/nginx-second.pid;
+
+      http {
+      …
+      	server {
+      		listen 9002;
+      	}
+      #include /etc/nginx/sites-enabled/*;
+      ….
+      }
+
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: yes
+
+- name: Enable and start watchlog.timer
+  ansible.builtin.systemd:
+    name: watchlog.timer
+    enabled: yes
+    state: started
+
+- name: Enable and start spawn-fcgi
+  ansible.builtin.systemd:
+    name: spawn-fcgi
+    enabled: yes
+    state: started
+
+- name: Enable and start nginx instances
+  ansible.builtin.systemd:
+    name: "nginx@first"
+    enabled: yes
+    state: started
+
+- name: Enable and start nginx second instance
+  ansible.builtin.systemd:
+    name: "nginx@second"
+    enabled: yes
+    state: started
