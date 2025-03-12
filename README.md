@@ -60,3 +60,9 @@ SYSTEMD
 
 PS_AX 
 Запуск bash ps_ax/ps_ax.sh
+
+
+Bash mail
+Раскомментировать строчку с отправкой и внести почту
+Скрипт просто выводит полученные данные в консоль 
+запуск bash mail_mail/ip3.sh или  crontab -e        0 * * * * ~/mail_mail/ip3.sh
