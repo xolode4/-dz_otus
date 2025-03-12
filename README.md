@@ -56,3 +56,7 @@ SYSTEMD
 Доработан unit-файл Nginx (nginx.service) для запуска нескольких инстансов сервера с разными конфигурационными файлами одновременно.
 
 Запуск ansible-playbook -i "10.10.10.58," systemd.yml
+
+
+PS_AX 
+Запуск bash ps_ax/ps_ax.sh
