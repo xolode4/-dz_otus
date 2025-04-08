@@ -1,0 +1,23 @@
+version: '3.8'
+networks:
+  caddy_network_acme:
+services:
+  nginx:
+    container_name: my-nginx
+    build:
+      context: /mnt/otus/nginx
+  #  ports:
+  #    - 80:80
+  #    - 8080:8080
+    volumes:
+      - /mnt/otus/nginx/nginx.conf:/etc/nginx/nginx.conf  # Подключаем конфигурационный файл
+    environment:
+      TZ: "Europe/Moscow"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200m"
+        max-file: "3"
+    restart: always
+    networks:
+      - caddy_network_acme

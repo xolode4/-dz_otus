@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  gitlab-runner:
+    image: gitlab/gitlab-runner:latest
+    container_name: gitlab-runner
+    restart: always
+    environment:
+      - TZ=Europe/Moscow
+#  - CA_CERTIFICATES_PATH=/usr/local/share/ca-certificates/home.lcl/home.lcl.crt  # Путь до корневых сертификатов
+    volumes:
+      - /mnt/otus/gitlab-runner:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock

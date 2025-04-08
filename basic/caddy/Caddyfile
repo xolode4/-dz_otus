@@ -1,0 +1,19 @@
+{
+acme_ca http://10.10.10.104:8201/v1/pki_home_lcl_acme/acme/directory
+}
+
+otus-prometheus.home.lcl {
+reverse_proxy prometheus:9090
+}
+
+otus-web.home.lcl {
+reverse_proxy nginx:80
+}
+
+otus-grafana.home.lcl {
+    reverse_proxy grafana:3000
+}
+    
+otus-kibana.home.lcl {
+    reverse_proxy kibana:5601
+}    

@@ -1,0 +1,22 @@
+networks:
+  caddy_network_acme:
+services:
+  web3:
+    image: my-backend-image:latest
+    container_name: my-web3
+    #ports:
+    #  - 8081:80           # Порт Apache
+    #  - 9117:9117         # Порт для метрик apache_exporter
+    volumes:
+      - /mnt/otus/apache-web3/index.html:/usr/local/apache2/htdocs/index.html
+      - /mnt/otus/apache-web3/apache-status.conf:/usr/local/apache2/conf/extra/apache-status.conf  # Файл с mod_status
+    environment:
+      TZ: "Europe/Moscow"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200m"
+        max-file: "3"
+    restart: always
+    networks:
+      - caddy_network_acme
