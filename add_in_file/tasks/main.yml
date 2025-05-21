@@ -1,0 +1,10 @@
+---
+# tasks file for roles/add_in_file
+- name: Добавление информации в файл
+  ansible.builtin.blockinfile:
+    path: "{{ item.path }}"
+    append_newline: true
+    prepend_newline: true
+    block: "{{ item.block }}"
+    marker: "    # {mark} ANSIBLE MANAGED BLOCK"
+  loop: "{{ add_in_file }}"

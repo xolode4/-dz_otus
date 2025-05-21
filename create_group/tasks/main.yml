@@ -1,0 +1,12 @@
+---
+# tasks file for roles/create-group
+- name: Ensure group " {{ create_group.name }}" exists
+  ansible.builtin.group:
+    name: "{{ item.name }}"
+    state: "{{ item.state | default('present') }}"
+    gid: "{{ item.gid | default(omit) }}"
+    system: "{{ item.system | default(omit) }}"
+  loop: "{{ create_group }}"
+  loop_control:
+    label: "{{ item.name }}"
+  become: true

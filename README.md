@@ -66,3 +66,11 @@ Bash mail
 Раскомментировать строчку с отправкой и внести почту
 Скрипт просто выводит полученные данные в консоль 
 запуск bash mail_mail/ip3.sh или  crontab -e        0 * * * * ~/mail_mail/ip3.sh
+
+
+Пользователи и группы. Авторизация и аутентификация_РАМ
+
+ansible-playbook -i "IP," create_group.yaml -u root -k
+ansible-playbook -i "IP," create_user.yaml -u root -k
+ansible-playbook -i "IP," script_cron.yaml -u root -k
+ansible-playbook -i "IP," add_in_file.yaml -u root -k

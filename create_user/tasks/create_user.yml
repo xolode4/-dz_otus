@@ -1,0 +1,42 @@
+---
+- name: Create group for "{{ user.name }}"
+  ansible.builtin.group:
+    name: "{{ user.name }}"
+    state: "{{ user.state | default('present') }}"
+
+- name: Create user "{{ user.name }}"
+  ansible.builtin.user:
+    name: "{{ user.name }}"
+    group: "{{ user.name }}"
+    shell: /bin/bash
+    create_home: yes
+    password: "{{ user.password }}"
+    state: "{{ user.state | default('present') }}"
+
+- name: Create .ssh directory for "{{ user.name }}"
+  ansible.builtin.file:
+    path: "/home/{{ user.name }}/.ssh"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: '0700'
+
+- name: Install authorized_keys for "{{ user.name }}"
+  ansible.builtin.copy:
+    src: "files/{{ user.files }}"
+    dest: "/home/{{ user.name }}/.ssh/authorized_keys"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: '0600'
+
+- name: Configure sudo access for "{{ user.name }}"
+  ansible.builtin.copy:
+    content: "{{ user.name }} {{ user. access }}"
+    dest: "/etc/sudoers.d/{{ user.name }}"
+    owner: root
+    group: root
+    mode: '0440'
+    validate: '/usr/sbin/visudo -cf %s'
+  when:
+    - user.access is defined
+    - user.access | trim | length > 0

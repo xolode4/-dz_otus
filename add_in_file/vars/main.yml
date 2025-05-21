@@ -1,0 +1,6 @@
+---
+# vars file for roles/add_in_file
+add_in_file:
+  - path: '/etc/pam.d/sshd'
+    block: |
+      auth required pam_exec.so debug /script/login.sh/login.sh

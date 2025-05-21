@@ -1,0 +1,6 @@
+---
+# vars file for roles/script_cron
+script_cron:
+  - name: "login.sh"
+    owner: "root"
+    group: "root"

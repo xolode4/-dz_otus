@@ -1,0 +1,14 @@
+---
+# defaults file for roles/create_user
+users_list:
+  - name: 'test2'
+    password: "$6$IKWwDnlqzIjKCFJR$2c2Sf2ICoXOVYRSRYNFnlJS29i.KQv34ZV/KPXQLTR5r037yHukrt5e521wYxrQXmXFgyLz3RnTkYm8dmj2fF/"
+    files: ""
+    access: " "
+    state: "present"
+
+  - name: test
+    password: "$6$IKWwDnlqzIjKCFJR$2c2Sf2ICoXOVYRSRYNFnlJS29i.KQv34ZV/KPXQLTR5r037yHukrt5e521wYxrQXmXFgyLz3RnTkYm8dmj2fF/"
+    files: ""
+    access: "ALL=(ALL) NOPASSWD:ALL"
+    state: "present"

@@ -1,0 +1,6 @@
+---
+# vars file for roles/create-group
+create_group:
+  - name: "admin"
+    state: "present"
+    gid: 2001

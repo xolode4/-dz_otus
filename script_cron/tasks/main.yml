@@ -1,0 +1,19 @@
+---
+# tasks file for roles/script_cron
+- name: Create script directory for "{{ item.name }}"
+  ansible.builtin.file:
+    path: "/script/{{ item.name }}/"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: '0700'
+  loop: "{{ script_cron }}"
+
+- name: Copy script file "{{ item.name }}"
+  ansible.builtin.copy:
+    src: "files/{{ item.name }}"
+    dest: "/script/{{ item.name }}/{{ item.name }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: '0700'
+  loop: "{{ script_cron }}"
