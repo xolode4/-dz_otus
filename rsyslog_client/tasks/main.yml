@@ -1,0 +1,18 @@
+---
+# tasks file for roles/rsyslog
+- name: Install rsyslog
+  apt:
+    name:
+      - rsyslog
+    state: present
+    update_cache: true
+
+- name: Add rsyslog configuration files
+  ansible.builtin.copy:
+    content: "{{ item.facility }}.{{ item.severity }} @@{{ rsyslog_client_server }}:514"
+    dest: "/etc/rsyslog.d/{{ item.name_file }}.conf"
+    owner: root
+    group: root
+    mode: '0440'
+  loop: "{{ rsyslog_client }}"
+  notify: Restart rsyslog

@@ -1,0 +1,7 @@
+---
+# vars file for roles/rsyslog
+rsyslog_client_server: "10.10.5.25"
+rsyslog_client:
+  - name_file: "all"
+    facility: "*"
+    severity: "*"   

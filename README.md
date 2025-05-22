@@ -74,3 +74,7 @@ ansible-playbook -i "IP," create_group.yaml -u root -k
 ansible-playbook -i "IP," create_user.yaml -u root -k
 ansible-playbook -i "IP," script_cron.yaml -u root -k
 ansible-playbook -i "IP," add_in_file.yaml -u root -k
+
+Основы сбора и хранения логов 
+ansible-playbook -i "IP," rsyslog_server.yaml -u root -k
+ansible-playbook -i "IP," rsyslog_client.yaml -u root -k
