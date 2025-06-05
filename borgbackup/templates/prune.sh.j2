@@ -1,0 +1,9 @@
+#!/bin/bash
+export BORG_REPO=ssh://borg@{{ borg_server_ip }}/var/backup/repo
+export BORG_PASSPHRASE='{{ borg_passphrase }}'
+
+borg prune -v --list :: \
+    --keep-daily=90 \
+    --keep-monthly=12 \
+    --keep-last=3 \
+    2>&1 | logger -t borg-prune

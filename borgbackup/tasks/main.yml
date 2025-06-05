@@ -1,0 +1,94 @@
+---
+- name: Установить borgbackup
+  apt:
+    name: borgbackup
+    state: present
+    update_cache: yes
+
+- name: Проверить, существует ли SSH ключ
+  become: true
+  stat:
+    path: /root/.ssh/id_rsa
+  register: id_rsa_key
+
+- name: Создать SSH ключ для borg
+  community.crypto.openssh_keypair:
+    path: /root/.ssh/id_rsa
+    type: rsa
+    size: 2048
+    mode: '0600'
+  #when: not id_rsa_key.stat.exists
+  become: true
+
+#- name: Скопировать публичный ключ для роли сервера
+#  become: true
+#  fetch:
+#    src: /root/.ssh/id_rsa.pub
+#    dest: "roles/borgbackup_server/files/client_id_rsa.pub"
+#    flat: yes
+#  delegate_to: localhost
+#  run_once: true
+
+- name: Проверить, существует ли borg-репозиторий
+  become: true
+  environment:
+    BORG_PASSPHRASE: "{{ borg_passphrase }}"
+  command: borg list {{backup_repo}}
+  register: borg_repo_check
+  ignore_errors: true
+
+- name: Инициализировать borg-репозиторий, если он не существует
+  become: true  # или true, если нужно
+  environment:
+    BORG_PASSPHRASE: "{{ borg_passphrase }}"
+  command: " borg init --encryption=repokey {{backup_repo}} "
+  when: borg_repo_check.rc != 0
+
+- name: Создать скрипт резервного копирования
+  copy:
+    dest: /usr/local/bin/borg_backup.sh
+    mode: '0755'
+    content: |
+      #!/bin/bash
+      export BORG_PASSPHRASE="{{ borg_passphrase }}"
+      export BORG_REPO="{{ backup_repo }}"
+      export BACKUP_TARGET="{{ backup_target }}"
+      LOG_TAG="{{ backup_log_tag }}"
+
+      borg create --stats --list \
+        $BORG_REPO::etc-$(date +%Y-%m-%d_%H-%M-%S) $BACKUP_TARGET 2>&1 | logger -t $LOG_TAG
+
+      borg prune --keep-daily=90 --keep-monthly=12 --keep-yearly=1 $BORG_REPO 2>&1 | logger -t $LOG_TAG
+
+- name: Создать systemd unit
+  copy:
+    dest: /etc/systemd/system/borg-backup.service
+    content: |
+      [Unit]
+      Description=Borg Backup
+
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/local/bin/borg_backup.sh
+  notify: Reload systemd
+
+- name: Создать systemd таймер
+  copy:
+    dest: /etc/systemd/system/borg-backup.timer
+    content: |
+      [Unit]
+      Description=Run Borg Backup every 5 minutes
+
+      [Timer]
+      OnBootSec=5min
+      OnUnitActiveSec=5min
+
+      [Install]
+      WantedBy=timers.target
+  notify: Reload systemd
+
+- name: Включить и запустить таймер
+  systemd:
+    name: borg-backup.timer
+    enabled: yes
+    state: started

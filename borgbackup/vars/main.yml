@@ -1,0 +1,6 @@
+---
+# vars file for roles/borgbackup
+backup_repo: "borg@10.10.5.19:/var/backup"
+borg_passphrase: "Otus1234"
+backup_target: "/etc"
+backup_log_tag: "borgbackup"

@@ -1,0 +1,12 @@
+#!/bin/bash
+export BORG_REPO=ssh://borg@{{ borg_server_ip }}/var/backup/repo
+export BORG_PASSPHRASE='{{ borg_passphrase }}'
+
+hostname=$(hostname -s)
+timestamp=$(date +'%Y-%m-%dT%H:%M:%S')
+
+borg create ::${hostname}-${timestamp} /etc \
+    --verbose --stats --compression lz4 \
+    2>&1 | logger -t borg-backup
+
+/usr/local/bin/prune.sh

@@ -1,0 +1,4 @@
+---
+# handlers file for roles/borgbackup
+- name: Reload systemd
+  command: systemctl daemon-reexec

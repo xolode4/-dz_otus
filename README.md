@@ -78,3 +78,10 @@ ansible-playbook -i "IP," add_in_file.yaml -u root -k
 Основы сбора и хранения логов 
 ansible-playbook -i "IP," rsyslog_server.yaml -u root -k
 ansible-playbook -i "IP," rsyslog_client.yaml -u root -k
+
+BORGbackup 
+на хосте создать ключ и поместить в роль с borgbackup_server
+
+ansible-playbook -i "10.10.5.24," borgbackup.yaml     на хосте 
+
+ansible-playbook -i "10.10.5.19," borgbackup_server.yaml  на сервере    

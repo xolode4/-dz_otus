@@ -1,0 +1,37 @@
+# tasks/main.yml
+- name: Установить borgbackup
+  apt:
+    name: borgbackup
+    state: present
+    update_cache: yes
+
+- name: Убедиться, что пользователь borg существует
+  user:
+    name: borg
+    shell: /bin/bash
+    create_home: yes
+
+- name: Создать каталог /var/backup
+  file:
+    path: /var/backup
+    state: directory
+    owner: borg
+    group: borg
+    mode: '0755'
+
+
+- name: Создать .ssh для borg
+  file:
+    path: /home/borg/.ssh
+    state: directory
+    owner: borg
+    group: borg
+    mode: '0700'
+
+- name: Установить authorized_keys
+  copy:
+    dest: /home/borg/.ssh/authorized_keys
+    content: "{{ lookup('file', 'files/client_id_rsa.pub') }}"
+    owner: borg
+    group: borg
+    mode: '0600'
