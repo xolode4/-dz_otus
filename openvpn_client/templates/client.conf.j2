@@ -1,0 +1,10 @@
+dev {{ openvpn_dev }}
+remote {{ openvpn_remote_ip }}
+ifconfig {{ openvpn_local_ip }} {{ openvpn_mask }}
+topology subnet
+route 10.10.5.19 255.255.255.0
+secret /etc/openvpn/static.key
+comp-lzo
+status /var/log/openvpn-status.log
+log /var/log/openvpn.log
+verb 3

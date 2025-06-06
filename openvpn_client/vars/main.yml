@@ -1,0 +1,6 @@
+---
+# vars file for roles/openvpn_client
+openvpn_dev: tap
+openvpn_remote_ip: 10.10.5.24
+openvpn_local_ip: 10.20.140.2
+openvpn_mask: 255.255.255.0

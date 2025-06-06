@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -Eeuo pipefail
+
+echo "$(date) User ${USERNAME} Disconnected - Bytes In: ${STATS_BYTES_IN} Bytes Out: ${STATS_BYTES_OUT} Duration:${STATS_DURATION}"
+iptables -t nat -D POSTROUTING -s "${IP_REMOTE}"/32 -o eth0 -j MASQUERADE

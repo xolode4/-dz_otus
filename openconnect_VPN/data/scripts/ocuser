@@ -1,0 +1,34 @@
+#!/bin/bash
+
+set -Eeuo pipefail
+
+# Check and set script params
+if [[ $# -eq 2 ]]; then
+    USER_UID="$1"
+    USER_CN="$2"
+elif [[ $# -eq 3 ]]; then
+	if [[ "$1" == "-A" ]]; then
+    		USER_UID="$2"
+    		USER_CN="$3"
+	else
+		echo "Use -A key as a first param to generate cert for IOS devices" >&2
+        exit 1
+	fi
+else
+    echo "Please run script with two params: username and 'Common Username'" >&2
+    echo "Example: ocuser john 'John Doe'" >&2
+    echo "For IOS or HarmonyOS devices add -A key as first param in command" >&2
+    echo "Example: ocuser -A steve 'Steve Jobs'" >&2
+    exit 1
+fi
+
+# Modify user cert template and generate user key, cert and protected .p12 file
+sed -i -e "s/^organization.*/organization = $SRV_CN/" -e "s/^cn.*/cn = $USER_CN/" -e "s/^uid.*/uid = $USER_UID/g" "${CERTS_DIR}"/users.cfg
+echo "$(tr -cd "[:alnum:]" < /dev/urandom | head -c 60)" | ocpasswd -c "${OCSERV_DIR}"/ocpasswd "$USER_UID"
+certtool --generate-privkey --outfile "${CERTS_DIR}"/"${USER_UID}"-privkey.pem
+certtool --generate-certificate --load-privkey "${CERTS_DIR}"/"${USER_UID}"-privkey.pem --load-ca-certificate "${CERTS_DIR}"/ca-cert.pem --load-ca-privkey "${CERTS_DIR}"/ca-key.pem --template "${CERTS_DIR}"/users.cfg --outfile "${CERTS_DIR}"/"${USER_UID}"-cert.pem
+if [[ "$1" == "-A" ]]; then
+	sleep 1 && certtool --to-p12 --load-certificate "${CERTS_DIR}"/"${USER_UID}"-cert.pem --load-privkey "${CERTS_DIR}"/"${USER_UID}"-privkey.pem --pkcs-cipher 3des-pkcs12 --hash SHA1 --outder --outfile "${SECRETS_DIR}"/"${USER_UID}".p12
+else
+	sleep 1 && certtool --load-certificate "${CERTS_DIR}"/"${USER_UID}"-cert.pem --load-privkey "${CERTS_DIR}"/"${USER_UID}"-privkey.pem --pkcs-cipher aes-256 --to-p12 --outder --outfile "${SECRETS_DIR}"/"${USER_UID}".p12
+fi

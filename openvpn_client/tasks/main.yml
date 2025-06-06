@@ -1,0 +1,35 @@
+---
+# tasks file for roles/openvpn_client
+- name: Установка пакетов
+  ansible.builtin.apt:
+    name:
+      - openvpn
+      - iperf3
+    update_cache: yes
+
+- name: Копирование ключа с сервера
+  ansible.builtin.copy:
+    src: fetched_keys/static.key
+    dest: /etc/openvpn/static.key
+    mode: '0600'
+  notify: Restart OpenVPN
+
+- name: Создание client.conf
+  ansible.builtin.template:
+    src: client.conf.j2
+    dest: /etc/openvpn/server.conf
+    mode: '0644'
+  notify: Restart OpenVPN
+
+- name: Создание systemd unit openvpn@.service
+  ansible.builtin.template:
+    src: openvpn@.service.j2
+    dest: /etc/systemd/system/openvpn@.service
+    mode: '0644'
+  notify: Restart OpenVPN
+
+- name: Включение и запуск openvpn@server
+  ansible.builtin.systemd:
+    name: openvpn@server
+    enabled: yes
+    state: started

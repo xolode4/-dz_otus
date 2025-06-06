@@ -85,3 +85,13 @@ BORGbackup
 ansible-playbook -i "10.10.5.24," borgbackup.yaml     на хосте 
 
 ansible-playbook -i "10.10.5.19," borgbackup_server.yaml  на сервере    
+
+
+
+VPN
+Создаем сервер
+ansible-playbook -i "10.10.5.24," openvpn_server.yaml  
+Клиент
+ansible-playbook -i "10.10.5.19," openvpn_client.yaml  
+
+Докер файлы и конфигурацией для ocserv в openconnect_VPN

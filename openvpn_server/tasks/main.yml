@@ -1,0 +1,45 @@
+---
+# tasks file for roles/openvpn_server
+- name: Установка пакетов
+  ansible.builtin.apt:
+    name:
+      - openvpn
+      - iperf3
+      - selinux-utils
+    update_cache: yes
+
+- name: Отключение SELinux
+  ansible.builtin.command: setenforce 0
+  when: ansible_selinux.status == "enabled"
+  ignore_errors: yes
+
+- name: Генерация static.key
+  ansible.builtin.command: openvpn --genkey secret /etc/openvpn/static.key
+  args:
+    creates: /etc/openvpn/static.key
+
+- name: Копирование static.key с сервера на Ansible-контроллер
+  ansible.builtin.fetch:
+    src: /etc/openvpn/static.key
+    dest: fetched_keys/
+    flat: yes
+
+- name: Создание server.conf
+  ansible.builtin.template:
+    src: server.conf.j2
+    dest: /etc/openvpn/server.conf
+    mode: '0644'
+  notify: Restart OpenVPN
+
+- name: Создание systemd unit openvpn@.service
+  ansible.builtin.template:
+    src: openvpn@.service.j2
+    dest: /etc/systemd/system/openvpn@.service
+    mode: '0644'
+  notify: Restart OpenVPN
+
+- name: Включение и запуск openvpn@server
+  ansible.builtin.systemd:
+    name: openvpn@server
+    enabled: yes
+    state: started

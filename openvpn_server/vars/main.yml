@@ -1,0 +1,8 @@
+---
+# vars file for roles/openvpn_server
+
+openvpn_dev: tap
+openvpn_ip: 10.20.140.1
+openvpn_mask: 255.255.255.0
+openvpn_proto: udp
+openvpn_port: 1207

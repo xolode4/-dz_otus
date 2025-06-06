@@ -1,0 +1,36 @@
+#!/bin/bash
+
+set -Eeuo pipefail
+
+if [[ ! -e "${CERTS_DIR}"/crl.tmpl ]]; then
+cat << __EOF__ > "${CERTS_DIR}"/crl.tmpl
+crl_next_update = 365
+crl_number = 1
+__EOF__
+fi
+
+if [[ $# -eq 1 ]]; then
+    if [[ "$1" == "HELP" ]]; then
+        echo "Usage:
+        CMD to revoke cert of some user: ocrevoke <exist_user> 
+        CMD to apply current revoked.pem: ocrevoke RELOAD
+        CMD to reset all revokes: ocrevoke RESET
+        CMD to print this help: ocrevoke HELP"
+    elif [[ "$1" == "RESET" ]]; then
+        certtool --generate-crl --load-ca-privkey "${CERTS_DIR}"/ca-key.pem --load-ca-certificate "${CERTS_DIR}"/ca-cert.pem --template "${CERTS_DIR}"/crl.tmpl --outfile "${CERTS_DIR}"/crl.pem
+        occtl reload
+    elif [[ "$1" == "RELOAD" ]]; then
+        certtool --generate-crl --load-ca-privkey "${CERTS_DIR}"/ca-key.pem --load-ca-certificate "${CERTS_DIR}"/ca-cert.pem --load-certificate "${CERTS_DIR}"/revoked.pem --template "${CERTS_DIR}"/crl.tmpl --outfile "${CERTS_DIR}"/crl.pem
+    else
+        USER_UID="$1"
+        cat "${CERTS_DIR}"/"${USER_UID}"-cert.pem >> "${CERTS_DIR}"/revoked.pem
+        certtool --generate-crl --load-ca-privkey "${CERTS_DIR}"/ca-key.pem --load-ca-certificate "${CERTS_DIR}"/ca-cert.pem --load-certificate "${CERTS_DIR}"/revoked.pem --template "${CERTS_DIR}"/crl.tmpl --outfile "${CERTS_DIR}"/crl.pem
+        occtl reload
+    fi
+else
+    echo "Usage:
+    CMD to revoke cert of some user: ocrevoke <exist_user> 
+    CMD to apply current revoked.pem: ocrevoke RELOAD
+    CMD to reset all revokes: ocrevoke RESET
+    CMD to print this help: ocrevoke HELP"
+fi
