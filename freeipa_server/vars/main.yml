@@ -1,0 +1,7 @@
+---
+# vars file for roles/freeipa-server
+ipa_domain: example.test
+ipa_realm: EXAMPLE.TEST
+ipa_hostname: ipa.example.test
+admin_password: StrongAdminPass123
+directory_manager_password: StrongDMPassword123

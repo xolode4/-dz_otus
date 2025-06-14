@@ -1,0 +1,7 @@
+# Установка на RedHat/Fedora
+- name: Установка пакетов FreeIPA Client на Fedora/RedHat
+  dnf:
+    name: 
+      - freeipa-client
+      - chrony
+    state: present

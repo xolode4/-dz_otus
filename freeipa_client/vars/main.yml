@@ -1,0 +1,6 @@
+---
+# vars file for roles/freeipa-client
+ipa_server: ipa.example.test
+ipa_domain: example.test
+ipa_realm: EXAMPLE.TEST
+admin_password: StrongAdminPass123

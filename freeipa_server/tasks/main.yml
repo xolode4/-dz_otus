@@ -1,0 +1,34 @@
+---
+# tasks file for roles/freeipa-server
+---
+- name: Установка chronyd
+  package:
+    name: chrony
+    state: present
+
+- name: Убедиться, что chronyd запущен и включён
+  service:
+    name: chronyd
+    state: started
+    enabled: true
+
+- name: Установка пакетов FreeIPA Server
+  package:
+    name:
+      - freeipa-server
+      - freeipa-server-dns
+      - bind-dyndb-ldap
+    state: present
+
+- name: Установка FreeIPA Server
+  command: >
+    ipa-server-install --unattended
+    --hostname={{ ipa_hostname }}
+    --domain={{ ipa_domain }}
+    --realm={{ ipa_realm }}
+    --ds-password={{ directory_manager_password }}
+    --admin-password={{ admin_password }}
+    --setup-dns
+    --no-forwarders
+  args:
+    creates: /etc/ipa/default.conf

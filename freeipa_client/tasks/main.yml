@@ -1,0 +1,33 @@
+---
+# tasks file for roles/freeipa-client
+
+
+- name: Определение ОС
+  set_fact:
+    os_family: "{{ ansible_os_family | lower }}"
+
+- include_tasks: setup-RHL.yml
+  when: ansible_os_family in  ['RedHat', 'Fedora']
+
+
+- include_tasks: setup-Debian.yml
+  when: ansible_os_family == 'Debian'
+
+
+- name: Убедиться, что chronyd запущен и включён
+  service:
+    name: chronyd
+    state: started
+    enabled: true
+
+- name: Установка клиента FreeIPA
+  command: >
+    ipa-client-install --unattended
+    --domain {{ ipa_domain }}
+    --realm {{ ipa_realm }}
+    --server {{ ipa_server }}
+    --principal admin
+    --password {{ admin_password }}
+    --mkhomedir
+  args:
+    creates: /etc/ipa/default.conf

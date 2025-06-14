@@ -1,0 +1,20 @@
+- name: Проверить доступность freeipa-client
+  shell: |
+    apt-cache policy freeipa-client | grep -q 'Candidate:'
+  register: ipa_candidate_check
+  ignore_errors: true
+  changed_when: false
+
+- name: Обновить APT-кэш
+  apt:
+    update_cache: yes
+
+- name: Установка пакетов FreeIPA Client на Ubuntu
+  apt:
+    name:
+      - chrony
+      - freeipa-client
+      - sssd
+      - oddjob
+      - oddjob-mkhomedir
+    state: present
