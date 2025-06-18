@@ -1,0 +1,7 @@
+---
+# handlers file for roles/pxe
+- name: Reload Apache
+  service:
+    name: apache2
+    state: reloaded
+  become: true

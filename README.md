@@ -103,3 +103,12 @@ Freeipa
 ansible-playbook -i "10.10.5.24," freeipa_server.yaml  
 Клиент
 ansible-playbook -i "10.10.5.19," freeipa_client.yaml  
+
+
+PXE
+Поднимает серврер apache2 и tftp сервер 
+Прописать на DHCP настройки этого сервера 
+Поправить под себя файл template/user-data.cfg.j2
+
+ansible-playbook -i "10.10.5.24," pxe.yaml         
+Роль скачает и распакует заложенные в пеерменных образа и сразу добавит из в файл Pxeconfig по дефолту будет грузится 25.10

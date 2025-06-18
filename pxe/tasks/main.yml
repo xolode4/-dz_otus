@@ -1,0 +1,139 @@
+---
+# tasks file for roles/pxe
+- name: Install required packages
+  apt:
+    name: 
+      - unzip
+      - apache2
+      - tftpd-hpa
+      - p7zip-full
+      - syslinux-common
+      
+    update_cache: yes
+
+- name: Create PXE directories
+  file:
+    path: "{{ item }}"
+    state: directory
+#   recurse: yes
+  loop:
+    - /srv/tftp
+    - /srv/images
+    - /srv/ks
+
+- name: Download and unpack ISOs
+  block:
+    - name: Download ISO image
+      get_url:
+        url: "{{ item.url }}"
+        dest: "{{ pxe_images_dir }}/{{ item.name }}.iso"
+        mode: '0644'
+      loop: "{{ pxe_iso_list }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Unpack ISO to directory
+      ansible.builtin.command:
+        cmd: " 7z x -y {{ pxe_images_dir }}/{{ item.name }}.iso -o{{ pxe_images_dir }}/{{ item.name }} "
+      args:
+        creates: "{{ pxe_images_dir }}/{{ item.name }}"
+      loop: "{{ pxe_iso_list }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+- name: Ensure ISO contents have proper permissions
+  ansible.builtin.file:
+    path: "/srv/images"
+    mode: 'a+rX'
+    recurse: true
+    follow: no 
+- name: Delete 000-default.conf
+  ansible.builtin.file:
+    state: absent
+    path: /etc/apache2/sites-enabled/000-default.conf 
+
+- name: Deploy default iPXE config
+  copy:
+    dest: /etc/apache2/sites-available/ks-server.conf
+    content: |
+      <VirtualHost *:80>
+         DocumentRoot /srv
+         <Directory /srv>
+             Options Indexes FollowSymLinks
+             AllowOverride None
+             Require all granted
+         </Directory>
+
+      <Directory /srv/ks>
+      Options Indexes MultiViews
+      AllowOverride All
+      Require all granted
+      </Directory>
+
+      <Directory /srv/images>
+      Options Indexes MultiViews
+      AllowOverride All
+      Require all granted
+      </Directory>
+
+      <Directory /srv/tftp>
+      Options Indexes MultiViews
+      AllowOverride All
+      Require all granted
+      </Directory>
+
+      ErrorLog /var/lock/apache2/error.log
+      CustomLog /var/lock/apache2/access.log combined
+      </VirtualHost>
+  notify: Reload Apache
+
+
+- name: Generate PXE boot menu
+  template:
+    src: pxelinux.cfg.j2
+    dest: "{{ pxe_pxelinux_cfg }}/default"
+    mode: '0644'
+
+
+- name: Create PXE directories
+  file:
+    path: "{{pxe_root_dir}}/{{ item.autoinstall_path }}"
+    state: directory
+#   recurse: yes
+  loop: "{{ pxe_iso_list }}"
+
+- name: Deploy autoinstall user-data and meta-data for each ISO
+  template:
+    src: "{{ item.template }}"
+    dest: "{{ pxe_ks_dir }}/{{ item.name }}/{{ item.dest }}"
+    mode: '0644'
+  loop: "{{ [
+      {'name': 'ubuntu-25.10', 'url': 'https://...', 'template': 'user-data.j2', 'dest': 'user-data'},
+      {'name': 'ubuntu-25.10', 'url': 'https://...', 'template': 'meta-data.j2', 'dest': 'meta-data'}
+    ] | list }}"
+
+
+- name: Ensure required COM32 modules are present
+  copy:
+    src: "{{ item }}"
+    dest: "{{ pxe_tftp_root }}/{{ item | basename }}"
+    remote_src: true
+    mode: '0644'
+  loop:
+    - /usr/lib/syslinux/modules/bios/menu.c32
+    - /usr/lib/syslinux/modules/bios/libutil.c32
+    - /usr/lib/syslinux/modules/bios/libcom32.c32
+    - /usr/lib/syslinux/modules/bios/ldlinux.c32
+  when: ansible_facts['os_family'] == 'Debian'
+  tags: pxe
+
+
+- name: Recursively change ownership of a /srv
+  ansible.builtin.file:
+    path: /srv
+    state: directory
+#    recurse: yes
+    owner: tftp
+    group: www-data
+    mode: '0777'
+    follow: no 

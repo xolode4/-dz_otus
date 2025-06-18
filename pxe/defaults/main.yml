@@ -1,0 +1,10 @@
+---
+# defaults file for roles/pxe
+extra_packages:
+  - qemu-guest-agent
+  - curl
+  - python3
+  - python3-pip
+  - ca-certificates 
+  - curl
+

@@ -1,0 +1,22 @@
+DEFAULT menu.c32
+PROMPT 0
+TIMEOUT 50
+ONTIMEOUT ubuntu-25.10
+
+MENU TITLE PXE Boot Menu
+
+LABEL BootLocal
+    localboot 0
+    TEXT HELP
+    Boot to local hard disk
+    ENDTEXT
+
+{% for iso in pxe_iso_list %}
+LABEL {{ iso.name }}
+  MENU LABEL Install {{ iso.name }}
+  KERNEL http://{{ ansible_facts['default_ipv4']['address'] }}/images/{{ iso.name }}/casper/vmlinuz
+  INITRD http://{{ ansible_facts['default_ipv4']['address'] }}/images/{{ iso.name }}/casper/initrd
+  APPEND ip=dhcp autoinstall ds=nocloud-net;s=http://{{ ansible_facts['default_ipv4']['address'] }}/{{ iso.autoinstall_path }} boot=casper netboot=url url=http://{{ ansible_facts['default_ipv4']['address'] }}/images/{{iso.name}}.iso ---
+{% endfor %}
+
+MENU END

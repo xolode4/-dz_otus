@@ -1,0 +1,58 @@
+#cloud-config
+autoinstall:
+  version: 1
+  identity:
+    hostname: ubuntu
+    username: vladimir
+    password: "*"
+  ssh:
+    install-server: true
+    authorized-keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKG2h0fMLQfGGGLlDmXqTUJq37DM/oa5k/ehLrOqUVOF vladimir@worknotebook
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCySrMcZMAC8C9b3LnKz+cljap0+jTIrl+peZzPzK94ufFKmelCaRRMtqdsT1vfOdVQSyLHCdK8yuxVfPQe3QWA+oxpQeWYnuuafdWQiE5RfagQPTIXE2LkNBT5BYUIccWM4rCnUhPQYGrd0ojKciHCfv2mkptnwbT/vbQ+eZvt8rv65A9jZbEBpidMD4ChJF7uE2k3/9bp8E7LIY2E2YLssuN++2Lg7wYYejGy8AFDmW57cJPboync1m7qiwCbzIszaON+CIQSUB/1596rEci4oIGu6k4jklU1hMsuknQqRyG8mkVvX5BBjyqalVoydPHjsLW7dyJmrZUcH70pcL2OmXu7hCpS4Ys8Rcxe1abudy4hqWKcSUWcSO4DmKPrzqmVhU7QIU7coDkbC1HYqBaIoL8ouyUSqxr6w95lKoXIL2INlDwS9eeO7bHtBgkRBqnxVO1fKankCdfem497MFtVQ/ROnTTiEKfThe5E6PoWHtrRok6eyMGvq9AMR8q+KZU= vladimir@VScode
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCrN6YlLQr05I7gdUJsE7ErK4551d+9yq2t8RCkkAU6QOAfgN82oYy0MDrX49oDWNSAk+jISXd5qlP9cKC4Ijm4HLRYs2/3LKPqCs4d9kBksJX2pPG/+3zFTBYYewwUbGlyMhEWsGojwN6Pb9o4zu6ftE/QEt7vXp99cUiXRcnO9wZLQ/ENw8hMS9Pc0nOxDKcgUJrio4ZsQ2dovC+UazuxSn7cKpxFeMtoV1Gr7iY5Zhi7WlQYaOjEyvSyYoBSsDoHuxPM3GZ5/53Wn5o3RzslDx68AeN3/Uh6BKawu5Vh+o0639T79K5vI/qlE/Gd5p1LfooJnxwQQySx51/LIXj6O2RASQbiXOInumvbgu6aqVWi+1KNxTMmq6ht3VtShF1We9uf6WqywFBkFm+YSLZI6UkNIVcoScIXPDEOxn2oO9ZIqf7nXf3TjM091JTy+5VM3+ZMwKFTcZ2FwnGhmm9hFuszaGjTxafTdm6Kb/mze0ohO9oj3n1HfGgQCs5IK8M= volodya@Rx5500
+  disable_root: true
+  timezone: Europe/Moscow
+  locale: en_US.UTF-8
+  package_update: true
+  package_upgrade: true
+  packages:
+    {% for pkg in extra_packages %}
+    - {{ pkg }}
+    {% endfor %}
+  
+  ca_certs:
+    remove_defaults: false
+    trusted:
+      - |
+        -----BEGIN CERTIFICATE-----
+        MIIDLDCCAhSgAwIBAgIUd8sADb1T4rL34O6Dtm5VKkptBPcwDQYJKoZIhvcNAQEL
+        BQAwEzERMA8GA1UEAxMIaG9tZS5sY2wwHhcNMjMxMDI4MTcxMTI3WhcNMzMxMDI1
+        MTcxMTU2WjATMREwDwYDVQQDEwhob21lLmxjbDCCASIwDQYJKoZIhvcNAQEBBQAD
+        ggEPADCCAQoCggEBAMVruqr+R9+Xg8aMg3Y4hUa5WZGt5e21KNPoCP+TpNnNjjTp
+        ISVKyqQcgcbuRCCjssCHZ6HjEx6SiG5vUy/pGnamMIoAOuwfNf2/nSJpArfTpFNa
+        loM3sPmQNCG1pRXtFm35OgqvCuR/HajbiKxU7GgXFrxnWVByZI8dY2ZVLf1L/PSj
+        gcSNhquUq7VYaJhVasGq7h/fcZrXCeBL/nzpsl2ribJ8ZnGq6H8S0J12KjisDnyG
+        VRu8GYPRgDB5yherikDFZEEiC/XzMgPay9ZT2zNwZP5hERpHlDEog/EZhpHxw7mb
+        vvnfHGc8JSlhh/92zTUyEA9yWCEeSslqvka98V8CAwEAAaN4MHYwDgYDVR0PAQH/
+        BAQDAgEGMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFEYlrzl64pvKInLXnr7o
+        7Wi/FxVfMB8GA1UdIwQYMBaAFEYlrzl64pvKInLXnr7o7Wi/FxVfMBMGA1UdEQQM
+        MAqCCGhvbWUubGNsMA0GCSqGSIb3DQEBCwUAA4IBAQB3vOPCFjdxXfV38tEJbgLw
+        ciyUFLJ2qXFYgijNo+o4hdjibgaiGUT7GmwQrlxzFvbax2hQL6vxfVlAAhgyoFqo
+        c897UzmaBhwFSPOix9gonSjQqm/MLuC4ucl9WEBWZ48u4GAwnZ3NPtTMNGyd/G3B
+        LvZiIfL+m/DKV6wcH9uy5PmryS5NdWc5E1YiaZeAsjkkxq6vFEeuLjHi+pVTptxS
+        vrz8En2B+T4qjcgj9fZ1oLsgpfQuq2tZ6BjDHX+wMKlF2yV1X32Ld7PwsSdb4bNt
+        gJJMhVNQ3at17ck+zz4VsLs14iACfY/zDqGSiPS1Wz/gnboG1YjxPLmb/OZ29VbF
+        -----END CERTIFICATE-----
+  
+  network:
+    version: 2
+    ethernets:
+      all-en:
+        match:
+          name: "en*"
+        dhcp4: true
+        dhcp-identifier: mac
+
+
+

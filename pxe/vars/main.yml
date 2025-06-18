@@ -1,0 +1,13 @@
+---
+# vars file for roles/pxe
+#ubuntu_netboot_url: "https://releases.ubuntu.com/24.04/ubuntu-24.04.1-netboot-amd64.tar.gz"
+#syslinux_url: "https://mirrors.edge.kernel.org/pub/linux/utils/boot/syslinux/syslinux-6.03.zip"
+pxe_root_dir: /srv
+pxe_images_dir: "{{ pxe_root_dir }}/images"
+pxe_ks_dir: "{{ pxe_root_dir }}/ks"
+pxe_tftp_root: /srv/tftp
+pxe_pxelinux_cfg: "{{ pxe_root_dir }}/tftp/pxelinux.cfg"
+pxe_iso_list:
+  - name: "ubuntu-25.10"
+    url: "https://cdimage.ubuntu.com/ubuntu-server/daily-live/current/questing-live-server-amd64.iso"
+    autoinstall_path: "ks/ubuntu-25.10/"
