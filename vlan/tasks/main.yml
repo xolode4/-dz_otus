@@ -1,0 +1,35 @@
+---
+# tasks file for roles/vlan
+- name: install software on Debian-based
+  apt:
+    name: 
+      - vim
+      - traceroute
+      - tcpdump
+      - net-tools
+    state: present
+    update_cache: true
+  when: (ansible_os_family == "Debian")
+
+- name: install software on CentOS
+  yum:
+    name:
+      - vim
+      - traceroute
+      - tcpdump
+      - net-tools
+    state: present
+    update_cache: true
+  when: (ansible_os_family == "RedHat")
+
+- name: set up vlan2
+  template:
+    src: 50-cloud-init.yaml.j2
+    dest: /etc/netplan/50-cloud-init.yaml 
+    owner: root
+    group: root
+    mode: 0644
+
+- name: apply set up vlan2
+  shell: netplan apply
+  become: true

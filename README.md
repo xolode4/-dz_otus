@@ -116,3 +116,10 @@ ansible-playbook -i "10.10.5.24," pxe.yaml
 DNS
 ansible-playbook -i "10.10.5.24," dns-server.yaml
 ansible-playbook -i "10.10.5.24," dns-client.yaml  
+
+bond и vlan
+
+bond.ymal собирает bond из 2 интерфейсов
+ansible-playbook -i "10.10.5.24," bond.yaml  
+vlan.ymal создает vlan на интерфейс
+ansible-playbook -i "10.10.5.24," vlan.yaml  

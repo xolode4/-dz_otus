@@ -1,0 +1,14 @@
+---
+# vars file for roles/bond
+---
+# vars file for roles/vlan
+bond_vlan_set: 
+  - vlan_id: "5"
+    vlan_ip: "10.10.5.200"
+    vlan_gate: "10.10.5.254"
+    mask: "24"
+    
+  - vlan_id: "6"
+    vlan_ip: "10.10.6.200"
+    vlan_gate: "10.10.6.254"
+    mask: "24"

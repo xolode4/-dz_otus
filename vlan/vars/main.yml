@@ -1,0 +1,9 @@
+---
+# vars file for roles/vlan
+vlan_vlan_set: 
+  - vlan_id: "5"
+    vlan_ip: "10.10.5.200"
+    vlan_gate: "10.10.5.254"
+  - vlan_id: "6"
+    vlan_ip: "10.10.6.200"
+    vlan_gate: "10.10.6.254"
