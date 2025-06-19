@@ -112,3 +112,7 @@ PXE
 
 ansible-playbook -i "10.10.5.24," pxe.yaml         
 Роль скачает и распакует заложенные в пеерменных образа и сразу добавит из в файл Pxeconfig по дефолту будет грузится 25.10
+
+DNS
+ansible-playbook -i "10.10.5.24," dns-server.yaml
+ansible-playbook -i "10.10.5.24," dns-client.yaml  

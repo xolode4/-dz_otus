@@ -1,0 +1,76 @@
+---
+- name: Install packages (Ubuntu)
+  apt:
+    name: "{{ item }}"
+    state: latest
+    update_cache: yes
+  loop:
+    - bind9
+    - dnsutils
+    - chrony
+
+- name: Copy transfer key to all servers and the client
+  copy:
+    src: named.zonetransfer.key
+    dest: /etc/bind/named.zonetransfer.key
+    owner: root
+    group: bind
+    mode: 0644
+
+- name: Start and enable chrony
+  service:
+    name: chrony
+    state: restarted
+    enabled: yes
+
+- name: Copy master or slave named.conf
+  copy:
+    src: "{{ 'master-named.conf.j2' if inventory_hostname == 'ns01' else 'slave-named.conf.j2' }}"
+    dest: /etc/bind/named.conf
+    owner: root
+    group: bind
+    mode: 0640
+
+- name: Ensure /etc/bind/zones directory exists
+  file:
+    path: /etc/bind/zones
+    state: directory
+    owner: root
+    group: bind
+    mode: 0755
+
+- name: Copy zone files (only for master)
+  copy:
+    src: "{{ item }}"
+    dest: /etc/bind/zones/{{ item }}
+    owner: root
+    group: bind
+    mode: 0660
+  loop:
+    - named.ddns.lab
+    - named.dns.lab
+    - named.dns.lab.rev
+    - named.dns.lab.client
+    - named.newdns.lab
+  when: inventory_hostname == "ns01"
+
+- name: Set resolv.conf on server
+  template:
+    src: servers-resolv.conf.j2
+    dest: /etc/resolv.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Set permissions on /etc/bind
+  file:
+    path: /etc/bind
+    owner: root
+    group: bind
+    mode: 0755
+
+- name: Restart and enable bind9 service
+  service:
+    name: bind9
+    state: restarted
+    enabled: yes

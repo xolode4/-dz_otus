@@ -1,0 +1,6 @@
+---
+# vars file for roles/dns-server
+dns-server-ns1: 192.168.50.10
+dns-server-ns2: 192.168.50.11
+dns-server-client1 : 192.168.50.15
+dns-server-client2 : 192.168.50.16
