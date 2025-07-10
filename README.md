@@ -1,125 +1,253 @@
-Перед запуском распространяем ключ и подключаемся к пользователю с привелигированными правами
-иначе добавляем -u USER(root или другой юзер ) -k (пароль) -K(become пароль ) 
+---
 
-ansible-playbook -i "IPхоста," nfs-server.yaml -e "nfs_server_export=[{'path': 'ЧТО ООТДАЕМ ', 'allowed_servers': 'КОМУ ', 'allowed_parametrs': 'ПАРАМЕТРЫ'}]" -u root -k 
+# 🛠 Ansible Playbook Collection
 
-В диалоговом окне " SSH password: " Ввести пароль
+Сборник Ansible-плейбуков для автоматизации настройки серверов: от NFS, VPN, FreeIPA, до логирования, PXE и PostgreSQL.
 
--- Протестированы роли nfs-server и nginx nfs-mount  --
-ansible-playbook -i "IPхоста," ФАЙЛ.yaml 
+---
 
-Переменные в папке var в каждой роли 
+## ⚙️ Перед запуском
 
--- Запуск -- 
+Убедитесь, что вы:
 
-NFS-SERVER
+* Распространили SSH-ключ на нужный хост
+* Или используете параметры `-u USER` (имя пользователя), `-k` (пароль), `-K` (become-пароль)
 
-ansible-playbook -i "IPхоста," nfs-server.yaml -e "nfs_server_export=[{'path': 'ЧТО ООТДАЕМ ', 'allowed_servers': 'КОМУ ', 'allowed_parametrs': 'ПАРАМЕТРЫ'}]"
+Пример команды:
 
+```bash
+ansible-playbook -i "IP_ХОСТА," nfs-server.yaml \
+  -e "nfs_server_export=[{'path': '/mnt/nfs-share', 'allowed_servers': '*.home.lcl', 'allowed_parametrs': 'rw,sync,no_subtree_check,no_root_squash'}]" \
+  -u root -k
+```
 
-ansible-playbook -i "IPхоста," nfs-server.yaml -e "nfs_server_export=[{'path': '/mnt/nfs-share', 'allowed_servers': '*.home.lcl', 'allowed_parametrs': 'rw,sync,no_subtree_check,no_root_squash'}]"
+В появившемся диалоге введите пароль:
+`SSH password: <ваш_пароль>`
 
-NGINX
+---
 
+## ✅ Протестированные роли
 
+* `nfs-server`
+* `nfs-mount`
+* `nginx`
+
+Запуск:
+
+```bash
+ansible-playbook -i "IP_ХОСТА," <ФАЙЛ>.yaml
+```
+
+---
+
+## 📁 Переменные
+
+Все переменные находятся в папке `vars/` внутри каждой роли.
+
+---
+
+## 🚀 Запуск ролей
+
+### NFS Server
+
+```bash
+ansible-playbook -i "IP," nfs-server.yaml \
+  -e "nfs_server_export=[{'path': '/mnt/nfs-share', 'allowed_servers': '*.home.lcl', 'allowed_parametrs': 'rw,sync,no_subtree_check,no_root_squash'}]"
+```
+
+### NGINX
+
+```bash
 ansible-playbook -i "10.10.10.56," nginx.yaml
+ansible-playbook -i "10.10.10.56," nginx.yaml -e "nginx_server_port=9090"
+```
 
-ansible-playbook -i "10.10.10.56," nginx.yaml -e "nginx_server_port=9090"     
+### NFS Mount
 
+```bash
+ansible-playbook -i "10.10.10.56," nfs-mount.yaml
+```
 
-NFS-MOUNT
+### mdadm
 
-ansible-playbook -i "10.10.10.56," nfs-mount.yaml  
+```bash
+ansible-playbook -i "10.10.10.56," mdadm.yaml
+```
 
+---
 
-mdadm
+## 📦 Содержание репозитория
 
-ansible-playbook -i "10.10.10.56," mdadm.yaml  
+### `firstlogon/`
 
+Пакет первого входа в систему
+Мини-инструкция внутри директории `repository/`
 
-свой репозиторий :
-пакет находится в firstlogon
-мини инструкция в repository
+---
 
-ZFS 
-скрипт и мини хелпер в соответствующей дирректории 
+## 🧠 Прочие роли
 
-GRUB
-Изменение параметров ядра и переименовывает LVM
+### ZFS
 
-SYSTEMD
+Скрипт и мини-хелпер в соответствующей директории.
 
-Создает service, который будет раз в 30 секунд мониторить лог на предмет наличия ключевого слова (файл лога и ключевое слово должны задаваться в /etc/default).
+---
 
-Установлен spawn-fcgi и создан  unit-файл (spawn-fcgi.sevice) с помощью переделки init-скрипта (https://gist.github.com/cea2k/1318020).
+### GRUB
 
-Доработан unit-файл Nginx (nginx.service) для запуска нескольких инстансов сервера с разными конфигурационными файлами одновременно.
+* Изменение параметров ядра
+* Переименование LVM-томов
 
-Запуск ansible-playbook -i "10.10.10.58," systemd.yml
+---
 
+### SYSTEMD
 
-PS_AX 
-Запуск bash ps_ax/ps_ax.sh
+* Сервис, мониторящий лог-файл раз в 30 секунд на ключевое слово (указывается в `/etc/default`)
+* `spawn-fcgi`: создан `systemd`-юнит из [init-скрипта](https://gist.github.com/cea2k/1318020)
+* Расширен юнит Nginx для запуска нескольких экземпляров с разными конфигами
 
+Запуск:
 
-Bash mail
-Раскомментировать строчку с отправкой и внести почту
-Скрипт просто выводит полученные данные в консоль 
-запуск bash mail_mail/ip3.sh или  crontab -e        0 * * * * ~/mail_mail/ip3.sh
+```bash
+ansible-playbook -i "10.10.10.58," systemd.yaml
+```
 
+---
 
-Пользователи и группы. Авторизация и аутентификация_РАМ
+### PS\_AX
 
+```bash
+bash ps_ax/ps_ax.sh
+```
+
+---
+
+### Mail (bash)
+
+* Раскомментируйте строку с отправкой и укажите почту
+* Скрипт выводит данные в консоль
+
+Запуск:
+
+```bash
+bash mail_mail/ip3.sh
+# или через cron:
+crontab -e
+0 * * * * ~/mail_mail/ip3.sh
+```
+
+---
+
+### Пользователи и группы
+
+```bash
 ansible-playbook -i "IP," create_group.yaml -u root -k
 ansible-playbook -i "IP," create_user.yaml -u root -k
 ansible-playbook -i "IP," script_cron.yaml -u root -k
 ansible-playbook -i "IP," add_in_file.yaml -u root -k
+```
 
-Основы сбора и хранения логов 
+---
+
+## 📝 Сбор и хранение логов
+
+```bash
 ansible-playbook -i "IP," rsyslog_server.yaml -u root -k
 ansible-playbook -i "IP," rsyslog_client.yaml -u root -k
+```
 
-BORGbackup 
-на хосте создать ключ и поместить в роль с borgbackup_server
+---
 
-ansible-playbook -i "10.10.5.24," borgbackup.yaml     на хосте 
+## 🔐 BORG Backup
 
-ansible-playbook -i "10.10.5.19," borgbackup_server.yaml  на сервере    
+1. На хосте: создайте ключ и добавьте в роль `borgbackup_server`
 
+```bash
+ansible-playbook -i "10.10.5.24," borgbackup.yaml
+ansible-playbook -i "10.10.5.19," borgbackup_server.yaml
+```
 
+---
 
-VPN
+## 🔐 VPN
 
-Создаем сервер
-ansible-playbook -i "10.10.5.24," openvpn_server.yaml  
-Клиент
-ansible-playbook -i "10.10.5.19," openvpn_client.yaml  
+### OpenVPN
 
-Докер файлы и конфигурацией для ocserv в openconnect_VPN
+**Сервер:**
 
-Freeipa
-Первичная настройка без создания пользователей 
-Создаем сервер
-ansible-playbook -i "10.10.5.24," freeipa_server.yaml  
-Клиент
-ansible-playbook -i "10.10.5.19," freeipa_client.yaml  
+```bash
+ansible-playbook -i "10.10.5.24," openvpn_server.yaml
+```
 
+**Клиент:**
 
-PXE
-Поднимает серврер apache2 и tftp сервер 
-Прописать на DHCP настройки этого сервера 
-Поправить под себя файл template/user-data.cfg.j2
+```bash
+ansible-playbook -i "10.10.5.19," openvpn_client.yaml
+```
 
-ansible-playbook -i "10.10.5.24," pxe.yaml         
-Роль скачает и распакует заложенные в пеерменных образа и сразу добавит из в файл Pxeconfig по дефолту будет грузится 25.10
+### OpenConnect (ocserv)
 
-DNS
+Docker-файлы и конфигурация в `openconnect_VPN/`
+
+---
+
+## 👤 FreeIPA
+
+Первичная настройка (без создания пользователей):
+
+```bash
+ansible-playbook -i "10.10.5.24," freeipa_server.yaml
+ansible-playbook -i "10.10.5.19," freeipa_client.yaml
+```
+
+---
+
+## 📡 PXE
+
+Настраивает Apache2 и TFTP-сервер.
+На DHCP-сервере укажите IP PXE-сервера.
+Редактируйте шаблон: `template/user-data.cfg.j2`
+
+```bash
+ansible-playbook -i "10.10.5.24," pxe.yaml
+```
+
+Образы автоматически скачиваются, распаковываются и добавляются в PXE-меню.
+По умолчанию используется Ubuntu 25.10.
+
+---
+
+## 🌐 DNS
+
+```bash
 ansible-playbook -i "10.10.5.24," dns-server.yaml
-ansible-playbook -i "10.10.5.24," dns-client.yaml  
+ansible-playbook -i "10.10.5.24," dns-client.yaml
+```
 
-bond и vlan
+---
 
-bond.ymal собирает bond из 2 интерфейсов
-ansible-playbook -i "10.10.5.24," bond.yaml  
-vlan.ymal создает vlan на интерфейс
-ansible-playbook -i "10.10.5.24," vlan.yaml  
+## 🔗 Bonding и VLAN
+
+### Bond
+
+```bash
+ansible-playbook -i "10.10.5.24," bond.yaml
+```
+
+### VLAN
+
+```bash
+ansible-playbook -i "10.10.5.24," vlan.yaml
+```
+
+---
+
+## 🐘 PostgreSQL
+
+```bash
+ansible-playbook -i inventory.yaml postgres_install.yaml
+ansible-playbook -i inventory.yaml postgres_replica.yaml
+ansible-playbook -i inventory.yaml postgres_barman.yaml
+```
+
+---
