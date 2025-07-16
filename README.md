@@ -251,3 +251,9 @@ ansible-playbook -i inventory.yaml postgres_barman.yaml
 ```
 
 ---
+## Docker web
+```bash
+
+ansible-playbook -i inventory.yaml web_docker.yaml
+
+```
