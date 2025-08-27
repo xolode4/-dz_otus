@@ -1,2 +1,0 @@
-Роль которая устанавливает docker compose и его зависимости , создает дирректорию /mnt/{{project}} и помещает туда сам файл docker compose , данный файд находится в папке ansible роли в дирректории files .
-мы рассмотрим вариант стенда nginx + php-fpm (wordpress) + python (django) + js(node.js)

@@ -1,0 +1,14 @@
+---
+# tasks file for roles/knock
+- name: Install knockd client
+  apt:
+    name: knockd
+    state: present
+
+- name: Create knock script
+  copy:
+    content: |
+      #!/bin/bash
+      knock {{ hostvars['inetRouter']['ansible_host'] }} {{ knock_sequence | join(' ') }}
+    dest: /usr/local/bin/knock-inetRouter
+    mode: '0755'

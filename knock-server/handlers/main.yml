@@ -1,0 +1,6 @@
+---
+# handlers file for roles/knock-server
+- name: restart knockd
+  ansible.builtin.service:
+    name: knockd
+    state: reloaded

@@ -1,0 +1,73 @@
+---
+- name: Create primary group for user
+  ansible.builtin.group:
+    name: "{{ user.group | default(user.name) }}"
+    gid: "{{ user.gid | default(omit) }}"
+    state: "{{ user.state | default('present') }}"
+    system: "{{ user.system | default(false) }}"
+  when: user.state != 'absent'
+
+- name: Manage user account
+  ansible.builtin.user:
+    name: "{{ user.name }}"
+    uid: "{{ user.uid | default(omit) }}"
+    group: "{{ user.group | default(user.name) }}"
+    groups: "{{ user.groups | default(omit) }}"
+    append: "{{ user.groups is defined }}"
+    shell: "{{ user.shell | default('/bin/bash') }}"
+    home: "{{ user.home | default(omit) }}"
+    create_home: "{{ user.create_home | default(true) }}"
+    password: "{{ user.password | default(omit) }}"
+    state: "{{ user.state | default('present') }}"
+    system: "{{ user.system | default(false) }}"
+    comment: "{{ user.comment | default(omit) }}"
+
+- name: Ensure SSH directory exists
+  ansible.builtin.file:
+    path: "{{ (user.home | default('/home/' + user.name)) + '/.ssh' }}"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.group | default(user.name) }}"
+    mode: '0700'
+  when: 
+    - user.state != 'absent'
+    - user.ssh_keys is defined or user.ssh_public_key is defined
+
+- name: Deploy authorized SSH keys
+  ansible.builtin.copy:
+    content: "{{ (user.ssh_keys | default([])) | join('\n') }}\n{{ user.ssh_public_key | default('') }}"
+    dest: "{{ (user.home | default('/home/' + user.name)) + '/.ssh/authorized_keys' }}"
+    owner: "{{ user.name }}"
+    group: "{{ user.group | default(user.name) }}"
+    mode: '0600'
+  when: 
+    - user.state != 'absent'
+    - (user.ssh_keys is defined and user.ssh_keys | length > 0) or (user.ssh_public_key is defined and user.ssh_public_key | trim | length > 0)
+
+- name: Configure sudo access
+  ansible.builtin.copy:
+    content: "{{ user.name }} {{ user.access | default('ALL=(ALL) NOPASSWD:ALL') }}\n"
+    dest: "/etc/sudoers.d/{{ user.name }}"
+    owner: root
+    group: root
+    mode: '0440'
+    validate: '/usr/sbin/visudo -cf %s'
+  when: 
+    - user.state != 'absent'
+    - user.sudo | default(false) | bool
+
+- name: Remove sudo configuration
+  ansible.builtin.file:
+    path: "/etc/sudoers.d/{{ user.name }}"
+    state: absent
+  when: 
+    - user.state == 'absent'
+    - user.sudo | default(false) | bool
+
+- name: Remove user account
+  ansible.builtin.user:
+    name: "{{ user.name }}"
+    state: absent
+    remove: "{{ user.remove_home | default(false) }}"
+    force: "{{ user.force_remove | default(false) }}"
+  when: user.state == 'absent'

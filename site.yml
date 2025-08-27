@@ -1,0 +1,14 @@
+- hosts: inetRouter
+  become: true
+  roles:
+    - knock-server
+
+- hosts: centralRouter
+  become: true
+  roles:
+    - knock
+
+- hosts: inetRouter2
+  become: true
+  roles:
+    - port_forward

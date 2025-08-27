@@ -1,0 +1,16 @@
+standart_package_list:      
+      - lsb-release
+      - ca-certificates
+      - curl
+      - gnupg2
+      - vim
+      - traceroute
+      - tcpdump
+      - net-tools
+      - jq
+      - curl
+# vars file for roles/create-group
+#create_group:
+#  - name: "admin"
+#    state: "present"
+#    gid: 2001

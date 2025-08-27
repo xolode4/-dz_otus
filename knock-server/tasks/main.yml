@@ -1,0 +1,26 @@
+---
+# tasks file for roles/knock-server
+- name: Install knockd
+  apt:
+    name: knockd
+    state: present
+
+- name: Deploy knockd config
+  template:
+    src: knockd.conf.j2
+    dest: /etc/knockd.conf
+  notify: restart knockd
+
+- name: Enable knockd service
+  systemd:
+    name: knockd
+    enabled: yes
+    state: started
+
+- name: Allow SSH only after knock
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: "{{ ssh_port }}"
+    jump: DROP
+  become: true

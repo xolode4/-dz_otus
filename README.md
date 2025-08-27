@@ -257,3 +257,38 @@ ansible-playbook -i inventory.yaml postgres_barman.yaml
 ansible-playbook -i inventory.yaml web_docker.yaml
 
 ```
+
+---
+## Knockd port + forward
+```bash
+
+  children:
+
+    routers:
+      hosts:
+        inetRouter:
+          ansible_host: 10.10.5.26
+        inetRouter2:
+          ansible_host: 10.10.5.25
+    servers:
+      hosts:
+        centralServer:
+          ansible_host: 10.10.5.25
+    clients:
+      hosts:
+        centralRouter:
+          ansible_host: 10.10.5.25
+
+
+
+ansible-playbook -i inventory/prod.yml site.yml
+
+Сделал локальный перебос
+
+Проверка 
+sudo iptables -t nat -L PREROUTING -n --line-numbers | grep 8080
+sudo iptables -t nat -L OUTPUT     -n --line-numbers | grep 8080
+
+knokd открвает для всех 
+```
+

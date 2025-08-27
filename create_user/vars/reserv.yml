@@ -1,0 +1,21 @@
+# Создаваемые пользователи
+user_manager_users:
+  - name: "deploy"
+    comment: "Deployment User"
+    uid: 2001
+    group: "devops"
+    groups: ["docker", "ssh"]
+    shell: "/bin/bash"
+    password: "$6$hashed_password"  # mkpasswd --method=SHA-512
+    ssh_keys:
+      - "ssh-rsa AAAAB3... user@host"
+    sudo: true
+    system: false
+    home: "/custom/home/deploy"
+    create_home: true
+
+# Удаляемые пользователи
+user_manager_users_to_remove:
+  - name: "olduser"
+    remove_home: true
+    force_remove: false

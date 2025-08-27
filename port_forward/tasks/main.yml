@@ -1,0 +1,25 @@
+---
+# tasks file for roles/port_forward
+- name: Install nginx
+  apt:
+    name: nginx
+    state: present
+
+- name: Ensure nginx is started
+  systemd:
+    name: nginx
+    state: started
+    enabled: yes
+
+- name: Ensure iptables rules for 8080->80 redirect (REDIRECT)
+  iptables:
+    table: nat
+    chain: "{{ item }}"
+    protocol: tcp
+    destination_port: 8080
+    jump: REDIRECT
+    to_ports: 80
+  become: true
+  loop:
+    - PREROUTING
+    - OUTPUT

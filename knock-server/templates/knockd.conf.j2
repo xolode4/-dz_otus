@@ -1,0 +1,16 @@
+[options]
+    UseSyslog
+    interface     = {{ ansible_default_ipv4.interface }} 
+[openSSH]
+    sequence = {{ knock_sequence | join(',') }}
+    seq_timeout = 15
+    tcpflags = syn
+
+    command = /sbin/iptables -I INPUT -s 0.0.0.0/0 -p tcp --dport {{ ssh_port }} -j ACCEPT
+
+[closeSSH]
+    sequence = {{ knock_sequence | reverse | join(',') }}
+    seq_timeout = 15
+    tcpflags = syn
+
+    command = /sbin/iptables -D INPUT -s 0.0.0.0/0 -p tcp --dport {{ ssh_port }} -j ACCEPT
