@@ -291,4 +291,15 @@ sudo iptables -t nat -L OUTPUT     -n --line-numbers | grep 8080
 
 knokd открвает для всех 
 ```
+---
+## OSPF/ FRR настройка
+```bash
+Собраннный ansible playbook из методички
 
+ansible-playbook -i inventory/prod.yml ospf.yml
+
+Тогда можно будет запускать playbook не полностью. Пример запуска модулей из ansible-playbook, которые помечены тегами:
+
+ansible-playbook -i ansible/hosts -l all ansible/provision.yml -t setup_ospf -e "host_key_checking=false"
+
+```

@@ -1,0 +1,30 @@
+---
+# vars file for roles/ospf
+router_id_enable: false 
+#router_id: '1.1.1.1'
+# Включить симметричный роутинг (true/false)
+symmetric_routing: false
+
+router_id: 1.1.1.1          # пример для router1
+interfaces:
+  - name: enp0s8
+    description: r1-r2
+    ip: 10.0.10.1/30
+  - name: enp0s9
+    description: r1-r3
+    ip: 10.0.12.1/30
+  - name: enp0s10
+    description: net_router1
+    ip: 192.168.10.1/24
+
+ospf_networks:
+  - network: 10.0.10.0/30
+    area: 0
+  - network: 10.0.12.0/30
+    area: 0
+  - network: 192.168.10.0/24
+    area: 0
+
+ospf_neighbors:
+  - 10.0.10.2
+  - 10.0.12.2
