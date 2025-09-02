@@ -1,0 +1,33 @@
+---
+- name: Disable UFW firewall
+  systemd:
+    name: ufw
+    state: stopped
+    enabled: no
+  become: true
+
+- name: Copy iptables rules
+  template:
+    src: iptables_rules.ipv4.j2
+    dest: /etc/iptables_rules.ipv4
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+
+- name: Copy iptables restore script
+  template:
+    src: iptables_restore.j2
+    dest: /etc/network/if-pre-up.d/iptables
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+
+- name: Enable IP forwarding
+  sysctl:
+    name: net.ipv4.conf.all.forwarding
+    value: '1'
+    state: present
+    reload: yes
+  become: true

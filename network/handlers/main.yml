@@ -1,0 +1,9 @@
+---
+- name: restart netplan
+  command: netplan apply
+  become: true
+
+- name: reboot host
+  reboot:
+    reboot_timeout: 300
+  become: true

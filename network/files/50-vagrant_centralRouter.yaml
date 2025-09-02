@@ -1,0 +1,25 @@
+---
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    enp0s3:
+      addresses:
+        - 192.168.0.1/28
+      routes:
+        - to: 192.168.2.0/24
+          via: 192.168.255.10
+        - to: 192.168.1.0/24
+          via: 192.168.255.6
+    enp0s4:
+      addresses:
+        - 192.168.0.33/28
+    enp0s5:
+      addresses:
+        - 192.168.0.65/26
+    enp0s6:
+      addresses:
+        - 192.168.255.9/30
+    enp0s7:
+      addresses:
+        - 192.168.255.5/30

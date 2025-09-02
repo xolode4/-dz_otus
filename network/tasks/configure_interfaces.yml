@@ -1,0 +1,21 @@
+---
+- name: Disable default route via DHCP
+  copy:
+    src: 00-installer-config.yaml
+    dest: /etc/netplan/00-installer-config.yaml
+    owner: root
+    group: root
+    mode: '0644'
+  when: ansible_hostname != "inetRouter"
+  become: true
+  notify: restart netplan
+
+- name: Configure static routes
+  copy:
+    src: "50-vagrant_{{ ansible_hostname }}.yaml"
+    dest: /etc/netplan/50-vagrant.yaml
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  notify: restart netplan

@@ -1,0 +1,11 @@
+---
+- name: Configure NAT on inetRouter
+  include_tasks: configure_nat.yml
+  when: ansible_hostname == "inetRouter"
+
+- name: Configure IP forwarding on routers
+  include_tasks: configure_routing.yml
+  when: "'routers' in group_names"
+
+- name: Configure network interfaces
+  include_tasks: configure_interfaces.yml

@@ -1,0 +1,15 @@
+---
+- name: Enable IP forwarding on routers
+  sysctl:
+    name: net.ipv4.conf.all.forwarding
+    value: '1'
+    state: present
+    reload: yes
+  become: true
+
+- name: Install traceroute
+  apt:
+    name: traceroute
+    state: present
+    update_cache: yes
+  become: true

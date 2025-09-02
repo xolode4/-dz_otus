@@ -1,0 +1,20 @@
+---
+# defaults file for roles/network
+network_lab:
+  nat_router: "inetRouter"
+  routers_group: "routers"
+  
+  networks:
+    office1:
+      dev: "192.168.2.0/26"
+      test: "192.168.2.64/26"
+      managers: "192.168.2.128/26"
+      hardware: "192.168.2.192/26"
+    office2:
+      dev: "192.168.1.0/25"
+      test: "192.168.1.128/26"
+      hardware: "192.168.1.192/26"
+    central:
+      directors: "192.168.0.0/28"
+      hardware: "192.168.0.32/28"
+      wifi: "192.168.0.64/26"
