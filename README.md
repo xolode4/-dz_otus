@@ -312,3 +312,31 @@ ansible-playbook -i ansible/hosts -l all ansible/provision.yml -t setup_ospf -e 
 ansible-playbook -i network/inventory network.yml
 
 ```
+
+
+---
+## MySQL
+```bash
+копируем backup
+scp bet.dmp root@10.10.5.27:/root/
+
+первый скрипт копируем
+scp master-setup.sh root@10.10.5.27:/root/
+
+второй скрипт копируем
+scp slave-setup.sh root@10.10.5.28:/root/
+
+запускаем
+
+ssh root@10.10.5.27 "bash /root/master-setup.sh"
+ssh root@10.10.5.28 "bash /root/slave-setup.sh"
+
+
+Проверки после выполнения на мастере:
+ssh root@10.10.5.27 "cat /tmp/master_show_tables.log"
+ssh root@10.10.5.27 "cat /tmp/master_gtid_check.log"
+
+Проверки после выполнения на слейве:
+ssh root@10.10.5.28 "cat /tmp/slave_status.log"
+ssh root@10.10.5.28 "cat /tmp/slave_show_tables.log"
+```
