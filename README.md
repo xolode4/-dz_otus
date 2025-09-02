@@ -318,6 +318,7 @@ ansible-playbook -i network/inventory network.yml
 ## MySQL
 ```bash
 копируем backup
+
 scp bet.dmp root@10.10.5.27:/root/
 
 первый скрипт копируем
