@@ -303,3 +303,12 @@ ansible-playbook -i inventory/prod.yml ospf.yml
 ansible-playbook -i ansible/hosts -l all ansible/provision.yml -t setup_ospf -e "host_key_checking=false"
 
 ```
+---
+## Network
+
+```bash
+Собраннный ansible playbook из методички
+
+ansible-playbook -i network/inventory network.yml
+
+```
