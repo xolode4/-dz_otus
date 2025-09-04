@@ -1,3 +1,93 @@
+###Первое задание
+Делайте всё под root (или через sudo). После каждого способа возвращайте систему в исходное состояние (удаляйте порт из разрешённых), чтобы следующий метод не пересекался с предыдущим.
+Подготовка (один раз)
+```bash
+dnf -y install nginx policycoreutils-python-utils setools-console
+systemctl enable --now nginx
+```
+# проверяем, что nginx действительно слушает 80-й порт
+```bash
+ss -tnlp | grep :80
+```
+SELinux сейчас в Enforcing:
+```bash
+getenforce   # → Enforcing
+```
+Пробуем просто поменять порт в конфиге:
+```bash
+
+sed -i 's/listen.*80;/listen 8888;/' /etc/nginx/nginx.conf
+systemctl restart nginx          # → failed
+journalctl -u nginx | grep sebool  # → видим «Permission denied»
+```
+Значит SELinux блокирует. Переходим к трём способам разблокировки.
+1-й способ: переключатели setsebool
+Самый быстрый, но «грубый» – разрешаем nginx-у все непривилегированные порты.
+```bash
+
+setsebool -P nis_enabled 1          # позволяет bind() к любому порту > 1023
+systemctl restart nginx
+ss -tnlp | grep 8888                # → nginx слушает
+curl -I http://127.0.0.1:8888       # → HTTP/1.1 200 OK
+```
+
+Как вернуть всё обратно:
+```bash
+
+setsebool -P nis_enabled 0
+systemctl restart nginx   # → снова failed (SELinux снова блокирует)
+```
+2-й способ: добавить порт к существующему типу
+Более тонкий – разрешаем только конкретный порт и только для http-трафика.
+```bash
+
+semanage port -a -t http_port_t -p tcp 8888
+systemctl restart nginx
+ss -tnlp | grep 8888
+curl -I http://127.0.0.1:8888
+```
+Откат:
+```bash
+
+semanage port -d -t http_port_t -p tcp 8888
+systemctl restart nginx   # → failed (SELinux)
+```
+3-й способ: собственный SELinux-модуль
+Полный контроль – пишем модуль, который разрешает nginx-у привязку к 8888.
+Создаём Type Enforcement-файл:
+```bash
+
+cat > nginx_8888.te <<'EOF'
+module nginx_8888 1.0;
+require {
+    type httpd_t;
+    type http_port_t;
+    class tcp_socket name_bind;
+}
+allow httpd_t http_port_t:tcp_socket name_bind;
+EOF
+```
+Компилируем и ставим:
+```bash
+
+checkmodule -M -m -o nginx_8888.mod nginx_8888.te
+semodule_package -o nginx_8888.pp -m nginx_8888.mod
+semodule -i nginx_8888.pp
+
+```
+Проверяем:
+```bash
+systemctl restart nginx
+ss -tnlp | grep 8888
+curl -I http://127.0.0.1:8888
+```
+Откат:
+```bash
+
+semodule -r nginx_8888
+```
+
+###Второе Задание
 Причина неработоспособности
 Скорее всего, проблема связана с SELinux, который ограничивает доступ к файлам и портам, используемым DNS-сервером. SELinux может блокировать обновления зоны, если не настроены соответствующие контексты и политики.
 Возможные решения
@@ -8,22 +98,23 @@
 Выберем решение 3: использование setsebool. Это решение позволяет сохранить SELinux включенным и обеспечивает безопасность, одновременно разрешая необходимые операции.
 Реализация решения
 Включение булева значения SELinux:
-bash
-Copy
+```bash
 sudo setsebool -P named_write_master_zones 1
+```
 Перезапуск службы DNS:
-bash
-Copy
+```bash
 sudo systemctl restart named
+```
 Проверка работоспособности:
 На клиентской станции выполнить команду nsupdate:
-bash
-Copy
+```bash
+
 nsupdate -k /etc/named.zonetransfer.key
 > server 192.168.50.10
 > zone ddns.lab
 > update add www.ddns.lab. 60 A 192.168.50.15
 > send
+
 Если обновление проходит успешно, значит проблема решена.
 Демонстрация работоспособности
 Скриншоты и описание:
@@ -31,3 +122,5 @@ nsupdate -k /etc/named.zonetransfer.key
 Скриншот состояния сервиса DNS на сервере после перезапуска.
 Скриншот текущего значения булева параметра SELinux (getsebool named_write_master_zones).
 Таким образом, проблема с удаленным обновлением зоны DNS была успешно решена с помощью изменения булева значения SELinux.
+
+
